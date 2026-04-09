@@ -1,0 +1,15 @@
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\FreeRoom.exe
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\FreeRoom.deps.json
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\FreeRoom.runtimeconfig.json
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\FreeRoom.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\FreeRoom.pdb
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.GeneratedMSBuildEditorConfig.editorconfig
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.AssemblyInfoInputs.cache
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.AssemblyInfo.cs
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.csproj.CoreCompileInputs.cache
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.sourcelink.json
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\refint\FreeRoom.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.pdb
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.genruntimeconfig.cache
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\ref\FreeRoom.dll
