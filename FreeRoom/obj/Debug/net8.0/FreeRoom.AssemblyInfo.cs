@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FreeRoom")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+77fa6f451815ca27da146e2dc6de332fc63e1a70")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8979bbd8080c7a0cc393595a6512ba4a3ac7d556")]
 [assembly: System.Reflection.AssemblyProductAttribute("FreeRoom")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FreeRoom")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
