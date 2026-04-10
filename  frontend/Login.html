@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>FIIT Folder - Вход</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="register-card">
+        <div class="card-header">
+            <h1>Вход</h1>
+            <p class="subtitle">Добро пожаловать в FIIT Folder</p>
+        </div>
+
+        <div class="register-form">
+            <div id="loginErrorContainer" class="error-alert hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="loginErrorText"></span>
+            </div>
+
+            <form id="loginForm">
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="input-label">Логин</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="loginUsername" class="input-field" placeholder="Введите логин" autocomplete="username">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="input-label">Пароль</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="loginPassword" class="input-field" placeholder="••••••••" autocomplete="current-password">
+                            <button type="button" class="toggle-password" data-target="loginPassword">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="loginSubmitBtn" class="register-btn">Войти</button>
+
+                <div class="login-link">
+                    Нет аккаунта? <a id="registerRedirectLink">Зарегистрироваться</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="RegScript.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="stylesheet" href="styles.css">
+    <title>MathMech Rooms - Регистрация</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="register-card">
+        <div class="card-header">
+            <!-- Back button (simulates navigate to "/login") -->
+            <button class="back-button" id="backBtn">
+                <i class="fas fa-chevron-left"></i>
+                <span>Назад</span>
+            </button>
+            <h1>Регистрация</h1>
+            <p class="subtitle">Создайте аккаунт в MathMech Rooms</p>
+        </div>
+
+        <div class="register-form">
+            <!-- Dynamic error message container -->
+            <div id="errorContainer" class="error-alert hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText"></span>
+            </div>
+
+            <form id="registerForm">
+                <div class="space-y-4">
+                    <!-- Username field -->
+                    <div class="form-group">
+                        <label class="input-label">Логин</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="username" class="input-field" placeholder="Придумайте логин"
+                                autocomplete="username">
+                        </div>
+                    </div>
+
+                    <!-- Password field -->
+                    <div class="form-group">
+                        <label class="input-label">Пароль</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password" class="input-field" placeholder="••••••••"
+                                autocomplete="new-password">
+                            <button type="button" class="toggle-password" data-target="password">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password field -->
+                    <div class="form-group">
+                        <label class="input-label">Подтвердите пароль</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="confirmPassword" class="input-field" placeholder="••••••••"
+                                autocomplete="off">
+                            <button type="button" class="toggle-password" data-target="confirmPassword">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="register-btn">Зарегистрироваться</button>
+
+                <div class="login-link">
+                    Уже есть аккаунт? <a id="loginLink">Войти</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="RegScript.js"></script>
+</body>
+
+</html>
