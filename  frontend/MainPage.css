@@ -1,0 +1,33 @@
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f6fc;
+    /* light background like app-bg */
+    min-height: 100vh;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+}
+
+.menu{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: grey;
+
+}
+
+button{
+    background: none;
+    border: none;
+}
+
+button:active{
+    transform: scale(0.95);
+}
+
+.menu-icon{
+    width: 55px;
+    margin: 15px; 
+}

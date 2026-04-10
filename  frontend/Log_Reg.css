@@ -7,7 +7,6 @@
 body {
     font-family: 'Inter', sans-serif;
     background-color: #f4f6fc;
-    /* light background like app-bg */
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -15,7 +14,6 @@ body {
     padding: 1rem;
 }
 
-/* card container */
 .register-card {
     width: 100%;
     max-width: 450px;
@@ -26,7 +24,6 @@ body {
     transition: all 0.2s ease;
 }
 
-/* header area */
 .card-header {
     padding: 2rem 2rem 1rem 2rem;
 }
@@ -40,7 +37,6 @@ body {
     font-size: 1rem;
     font-weight: 500;
     color: #1e2a3e;
-    /* primary-dark */
     margin-bottom: 2rem;
     cursor: pointer;
     transition: opacity 0.2s;
@@ -57,7 +53,6 @@ body {
 
 h1 {
     font-size: 2.5rem;
-    /* 4xl approx */
     font-weight: 800;
     letter-spacing: -0.02em;
     color: #1e2a3e;
