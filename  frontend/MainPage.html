@@ -14,15 +14,31 @@
 
     <link rel="stylesheet" href="MainPage.css">
 </head>
+
 <body>
     <div class="menu">
-        <button class="user-button">
+        <button id="openModalBtn" class="modal-btn user-button">
             <img src="icons/user.png" class="menu-icon user-icon">
         </button>
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <button class="myTable-btn">
+                    <img src="icons/list.png" class="modalIcon">
+                    Мое расписание</button>
+                <button class="addBron-btn">
+                    <img src="icons/add.png" class="modalIcon">
+                    Добавить бронь</button>
+                <button class="myBron-btn">
+                    <img src="icons/list.png" class="modalIcon">
+                    Мои брони</button>
+            </div>
+        </div>
         <a>Название/Иконка | Текущая пара</a>
         <button class="search-button">
             <img src="icons/search.png" class="menu-icon search-icon">
         </button>
     </div>
-    <div>Test</div>
+    <script src="Modalscript.js"></script>
+    <div>heelloo</div>
 </body>
