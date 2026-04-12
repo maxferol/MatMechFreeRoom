@@ -38,10 +38,13 @@ window.onload = function() {
     ctx.translate(ctxOffset.x, ctxOffset.y);
   }
 
+const modal = document.getElementById('myModalRoom');
+
   function reactToClick(event){
     if (ctx.isPointInPath(room, event.offsetX, event.offsetY)) {
       ctx.fillStyle = 'green';
       ctx.fill(room);
+      modal.style.display = 'block';
       console.log('room clicked');
     }
     else
