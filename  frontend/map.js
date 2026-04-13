@@ -38,10 +38,22 @@ window.onload = function() {
     ctx.translate(ctxOffset.x, ctxOffset.y);
   }
 
+  function getCanvasCoordinates(event) {
+    var canvasRect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / canvasRect.width;
+    var scaleY = canvas.height / canvasRect.height;
+    
+    var mouseX = (event.clientX - canvasRect.left) * scaleX;
+    var mouseY = (event.clientY - canvasRect.top) * scaleY;
+    
+    return { x: mouseX, y: mouseY };
+  }
+
 const modal = document.getElementById('myModalRoom');
 
   function reactToClick(event){
-    if (ctx.isPointInPath(room, event.offsetX, event.offsetY)) {
+    var canvasMousePos = getCanvasCoordinates(event)
+    if (ctx.isPointInPath(room, canvasMousePos.x, canvasMousePos.y)) {
       ctx.fillStyle = 'green';
       ctx.fill(room);
       modal.style.display = 'block';
