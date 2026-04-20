@@ -1,39 +1,18 @@
+// Модальное окно пользовательского меню
 const modal = document.getElementById('myModal');
 const openModalBtn = document.getElementById('openModalBtn');
-const closeBtn = document.querySelector('.close');
-const cancelBtn = document.querySelector('.cancel-btn');
-const confirmBtn = document.querySelector('.confirm-btn');
+const closeBtn = document.querySelector('#myModal .close');
 
 // Функция для открытия модального окна
 function openModal() {
     modal.style.display = 'block';
-    document.body.style.overflow = 'hidden'; // Блокируем прокрутку страницы
+    document.body.style.overflow = 'hidden';
 }
 
 // Функция для закрытия модального окна
 function closeModal() {
     modal.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Возвращаем прокрутку
-}
-
-// Обработчик для кнопки "Подтвердить"
-function handleConfirm() {
-    const input = document.querySelector('.modal-input');
-    const message = input.value.trim();
-    
-    if (message) {
-        alert(`Вы подтвердили действие с сообщением: "${message}"`);
-    } else {
-        alert('Действие подтверждено!');
-    }
-    closeModal();
-}
-
-// Обработчик для кнопки "Отмена"
-function handleCancel() {
-    if (confirm('Вы уверены, что хотите отменить действие?')) {
-        closeModal();
-    }
+    document.body.style.overflow = 'auto';
 }
 
 // Закрытие при клике вне модального окна
@@ -45,28 +24,76 @@ function handleOutsideClick(event) {
 
 // Закрытие по клавише Escape
 function handleEscapeKey(event) {
-    if (event.key === 'Escape' && modal.style.display === 'block') {
-        closeModal();
+    if (event.key === 'Escape') {
+        if (modal.style.display === 'block') closeModal();
+        const roomModal = document.getElementById('myModalRoom');
+        if (roomModal && roomModal.style.display === 'block') closeRoomModal();
     }
 }
 
-// Назначаем обработчики событий
-openModalBtn.addEventListener('click', openModal);
-closeBtn.addEventListener('click', closeModal);
-cancelBtn.addEventListener('click', handleCancel);
-confirmBtn.addEventListener('click', handleConfirm);
+// Обработчики для кнопок меню
+const myTableBtn = document.querySelector('.myTable-btn');
+const addBronBtn = document.querySelector('.addBron-btn');
+const myBronBtn = document.querySelector('.myBron-btn');
+
+if (myTableBtn) {
+    myTableBtn.addEventListener('click', () => {
+        alert('Мое расписание - в разработке');
+        closeModal();
+    });
+}
+
+if (addBronBtn) {
+    addBronBtn.addEventListener('click', () => {
+        alert('Добавление брони - в разработке');
+        closeModal();
+    });
+}
+
+if (myBronBtn) {
+    myBronBtn.addEventListener('click', () => {
+        alert('Мои брони - в разработке');
+        closeModal();
+    });
+}
+
+// Назначаем обработчики
+if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+if (closeBtn) closeBtn.addEventListener('click', closeModal);
 window.addEventListener('click', handleOutsideClick);
 document.addEventListener('keydown', handleEscapeKey);
 
-// Опционально: очищаем поле ввода при закрытии
-function cleanupModal() {
-    const input = document.querySelector('.modal-input');
-    if (input) input.value = '';
+// Функции для модального окна комнаты
+function openRoomModal(roomName) {
+    const roomModal = document.getElementById('myModalRoom');
+    const cabinetElement = document.querySelector('#myModalRoom .cabinet');
+    if (cabinetElement) cabinetElement.textContent = roomName;
+    if (roomModal) roomModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
 }
 
-// Добавляем очистку при закрытии
-const originalCloseModal = closeModal;
-window.closeModal = function() {
-    cleanupModal();
-    originalCloseModal();
-};
+function closeRoomModal() {
+    const roomModal = document.getElementById('myModalRoom');
+    if (roomModal) roomModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Обработчик для кнопки бронирования в модальном окне комнаты
+const makeBronBtn = document.querySelector('.makeBron');
+if (makeBronBtn) {
+    makeBronBtn.addEventListener('click', () => {
+        const cabinet = document.querySelector('#myModalRoom .cabinet');
+        alert(`Бронирование ${cabinet ? cabinet.textContent : 'комнаты'} - функция в разработке`);
+        closeRoomModal();
+    });
+}
+
+// Закрытие модального окна комнаты по крестику
+const roomCloseBtn = document.querySelector('#myModalRoom .close');
+if (roomCloseBtn) roomCloseBtn.addEventListener('click', closeRoomModal);
+
+// Закрытие по клику вне окна комнаты
+window.addEventListener('click', (event) => {
+    const roomModal = document.getElementById('myModalRoom');
+    if (event.target === roomModal) closeRoomModal();
+});
