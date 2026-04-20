@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="MainPage.css">
+
     <title>MathMech Rooms - Регистрация</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
@@ -12,7 +13,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <link rel="stylesheet" href="MainPage.css">
+
 </head>
 
 <body>
@@ -20,7 +21,7 @@
         <button id="openModalBtn" class="modal-btn user-button">
             <img src="icons/user.png" class="menu-icon user-icon">
         </button>
-        <div id="myModal" class="modal">
+        <div id="myModal" class="modal modalUser">
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <button class="myTable-btn">
@@ -34,20 +35,47 @@
                     Мои брони</button>
             </div>
         </div>
-        <a>Название/Иконка | Текущая пара</a>
+        <a class="menuTime">MatmechMaps | 20.04 12:50-14:20</a>
         <button class="search-button">
             <img src="icons/search.png" class="menu-icon search-icon">
         </button>
     </div>
     <script src="Modalscript.js"></script>
-    <canvas id="c" class="container h-75" width="1000px" height="600px" style="border: solid 1px blue"></canvas>
+    <div class="floor-switcher">
+        <button class="floor-btn floor-5" data-floor="5">5 этаж</button>
+        <button class="floor-btn floor-6 active" data-floor="6">6 этаж</button>
+    </div>
+    <div class="map">
+        <canvas id="c" class="container map-canvas" height="600px"></canvas>
+    </div>
     <div id="myModalRoom" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <div class="cabinet">Кабинет 622а</div>
-                <div class="time">Пара: 9:00 - 10:30</div>
-                <button class="makeBron">Ну пусть забронировать</button>
+        <div class="modal-content">
+            <span class="close">&times;</span>
+
+            <div class="cabinet">Кабинет 621</div>
+
+            <div class="date-field">
+                <label>Дата:</label>
+                <input type="date" id="bookingDate" value="2026-04-13">
+                <span class="weekday">(пн)</span>
             </div>
+
+            <div class="time-field">
+                <label>Пара:</label>
+                <div class="time-select">
+                    <select id="bookingTime">
+                        <option value="9:00-10:30">9:00 - 10:30</option>
+                        <option value="10:40-12:10">10:40 - 12:10</option>
+                        <option value="12:20-13:50">12:50 - 14:20</option>
+                        <option value="14:00-15:30">14:30 - 16:00</option>
+                        <option value="15:40-17:10">16:10 - 17:40</option>
+                        <option value="17:20-18:50">17:50 - 19:20</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="makeBron">Забронировать</button>
         </div>
+    </div>
     <script src="map.js" defer></script>
 </body>
