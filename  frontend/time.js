@@ -1,4 +1,4 @@
-function getCurrentPair() {
+window.getCurrentPair =  function() {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
     

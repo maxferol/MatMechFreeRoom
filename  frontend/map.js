@@ -11,6 +11,11 @@ window.onload = function () {
     let dragStartY = 0;
     let lastX = 0;
     let lastY = 0;
+    
+    // Глобальные переменные для статусов
+    let roomsStatus = {};
+    let currentPair = null;
+    let isDataLoaded = false;
 
     const rooms = [
         { name: "621", x: 897, y: 19, width: 130, height: 127, path: null, },
@@ -20,7 +25,7 @@ window.onload = function () {
         { name: "636", x: 1172, y: 183, width: 28, height: 122, path: null },
         { name: "638", x: 1200, y: 183, width: 28, height: 122, path: null },
         { name: "640", x: 1230, y: 183, width: 60, height: 122, path: null },
-        
+
         { name: "628", x: 865, y: 183, width: 110, height: 122, path: null },
         { name: "630", x: 977, y: 183, width: 25, height: 122, path: null },
         { name: "626", x: 830, y: 183, width: 35, height: 122, path: null },
@@ -43,7 +48,7 @@ window.onload = function () {
         { name: "615", x: 840, y: 19, width: 19, height: 125, path: null },
         { name: "617", x: 859, y: 19, width: 19, height: 125, path: null },
         { name: "619", x: 878, y: 19, width: 19, height: 125, path: null },
-        
+
         { name: "623", x: 1180, y: 19, width: 50, height: 100, path: null },
         { name: "625", x: 1233, y: 19, width: 55, height: 100, path: null },
     ];
@@ -52,9 +57,63 @@ window.onload = function () {
     const mapImage = new Image();
     mapImage.onload = function () {
         resizeCanvas();
-        draw();
+        initData(); // Загружаем данные после загрузки карты
     };
     mapImage.src = './map6floor.svg';
+
+    // Функция получения текущей пары
+    function getCurrentPair() {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        
+        // Пары с временными интервалами
+        if (currentTime >= 9 * 60 && currentTime < 10 * 60 + 30) return 1;
+        if (currentTime >= 10 * 60 + 40 && currentTime < 12 * 60 + 10) return 2;
+        if (currentTime >= 12 * 60 + 20 && currentTime < 13 * 60 + 50) return 3;
+        if (currentTime >= 14 * 60 + 30 && currentTime < 16 * 60) return 4;
+        if (currentTime >= 16 * 60 + 10 && currentTime < 17 * 60 + 40) return 5;
+        if (currentTime >= 17 * 60 + 50 && currentTime < 19 * 60 + 20) return 6;
+        
+        return null;
+    }
+
+    // Функция загрузки статусов комнат из JSON (один раз)
+    async function loadRoomsStatus() {
+        try {
+            const response = await fetch('../parsing/rooms.json');
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Ошибка загрузки rooms.json:', error);
+            return {};
+        }
+    }
+
+    // Функция проверки, есть ли пара в комнате
+    function hasClassNow(roomName) {
+        if (!currentPair) return false;
+        const roomStatus = roomsStatus[roomName];
+        if (!roomStatus) return false;
+        return roomStatus.includes(currentPair);
+    }
+
+    // Инициализация данных
+    async function initData() {
+        roomsStatus = await loadRoomsStatus();
+        currentPair = getCurrentPair();
+        isDataLoaded = true;
+        
+        // Обновляем время каждую минуту
+        setInterval(() => {
+            const newPair = getCurrentPair();
+            if (newPair !== currentPair) {
+                currentPair = newPair;
+                draw(); // Перерисовываем только если пара изменилась
+            }
+        }, 60000);
+        
+        draw(); // Первая отрисовка
+    }
 
     function resizeCanvas() {
         canvas.width = mapImage.width;
@@ -64,7 +123,6 @@ window.onload = function () {
 
         // Центрируем карту при загрузке
         centerMap();
-        draw();
     }
 
     // Центрирование карты
@@ -94,7 +152,7 @@ window.onload = function () {
         let maxX = 0;
         let maxY = 0;
 
-        // Если карта меньше canvas, центрируем е
+        // Если карта меньше canvas, центрируем её
         if (mapWidth < canvasWidth) {
             minX = (canvasWidth - mapWidth) / 2;
             maxX = minX;
@@ -124,7 +182,8 @@ window.onload = function () {
 
     function draw() {
         if (!ctx || !mapImage.complete) return;
-
+        if (!isDataLoaded) return; // Ждем загрузки данных
+        
         canvas.width = canvas.width;
         ctx.save();
 
@@ -135,12 +194,20 @@ window.onload = function () {
 
         rooms.forEach(room => {
             ctx.save();
-            
+
             if (room.name === "608") {
-                ctx.rotate(-Math.PI/8); // 30 градусов
+                ctx.rotate(-Math.PI / 8); // 30 градусов
             }
 
-            ctx.fillStyle = 'rgba(255, 255, 0, 0.4)';
+            // Определяем цвет комнаты (используем сохраненные данные)
+            const hasPair = hasClassNow(room.name);
+
+            if (hasPair) {
+                ctx.fillStyle = 'rgba(128, 128, 128, 0.6)'; // Серый - есть пара
+            } else {
+                ctx.fillStyle = 'rgba(76, 175, 80, 0.6)'; // Зеленый - нет пары
+            }
+
             ctx.fill(room.path);
 
             ctx.lineWidth = 2 / scale;
@@ -153,7 +220,7 @@ window.onload = function () {
             let fontSize = 18 * scale;
             fontSize = Math.min(20, Math.max(12, fontSize));
 
-            ctx.save(); // Сохраняем состояние перед поворотом для этого room
+            ctx.save();
 
             ctx.translate(centerX, centerY);
             if (room.width <= 40) {
@@ -167,14 +234,15 @@ window.onload = function () {
 
             ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
             ctx.shadowBlur = 3;
-            ctx.fillText(room.name, 0, 0); // <-- Здесь 0, 0, потому что translate уже сдвинул
+            ctx.fillText(room.name, 0, 0);
             ctx.shadowBlur = 0;
-            ctx.fillText(room.name, 0, 0); // <-- И здесь тоже 0, 0
+            ctx.fillText(room.name, 0, 0);
 
-            ctx.restore(); // Восстанавливаем состояние после поворота для этого room
+            ctx.restore();
+            ctx.restore();
         });
 
-        ctx.restore(); // Восстанавливаем основное состояние (translate и scale)
+        ctx.restore();
     }
 
     function getCanvasCoords(e) {
@@ -318,6 +386,6 @@ window.onload = function () {
 
     if (mapImage.complete) {
         resizeCanvas();
-        draw();
+        // Не вызываем draw здесь, он вызовется в initData
     }
 };
