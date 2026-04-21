@@ -23,7 +23,6 @@
         </button>
         <div id="myModal" class="modal modalUser">
             <div class="modal-content">
-                <span class="close">&times;</span>
                 <button class="myTable-btn">
                     <img src="icons/list.png" class="modalIcon">
                     Мое расписание</button>
@@ -41,16 +40,18 @@
         </button>
     </div>
     <script src="Modalscript.js"></script>
-    <div class="floor-switcher">
-        <button class="floor-btn floor-5" data-floor="5">5 этаж</button>
-        <button class="floor-btn floor-6 active" data-floor="6">6 этаж</button>
-    </div>
+
     <div class="map">
+        <div class="floor-switcher">
+            <button class="floor-btn floor-5" data-floor="5">5 этаж</button>
+            <button class="floor-btn floor-6 active" data-floor="6">6 этаж</button>
+        </div>
         <canvas id="c" class="container map-canvas" height="600px"></canvas>
     </div>
+
+
     <div id="myModalRoom" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
 
             <div class="cabinet">Кабинет 621</div>
 

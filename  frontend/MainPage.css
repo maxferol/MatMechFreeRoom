@@ -40,11 +40,11 @@ button:active{
 
 .map{
     display: flex;
-    width: 95%;
+    justify-content: center;
 }
 
 .map-canvas{
-    justify-content: center;
+    padding: 10px;
 }
 
 
@@ -278,10 +278,6 @@ button{
     color: #888;
     margin-top: 5px;
     display: inline-block;
-}
-
-.map{
-    width: 95%;
 }
 
 .time-field select {
