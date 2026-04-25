@@ -10,7 +10,11 @@
     <ItemGroup>
       <Folder Include="backend\src\Api\" />
       <Folder Include="backend\src\Application\" />
-      <Folder Include="backend\src\Infrastructure\qef\" />
+      <Folder Include="backend\src\Infrastructure\Authentication\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MongoDB.Driver" Version="3.8.0" />
     </ItemGroup>
 
 </Project>
