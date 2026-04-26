@@ -1,0 +1,840 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f6fc;
+    min-height: 100vh;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+}
+
+.menu {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: grey;
+    position: relative;
+    z-index: 200;
+}
+
+.controls-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 20px 20px 0 20px;
+    background: transparent;
+    margin-top: 1vh;
+}
+
+.menuTime {
+    margin-top: 30px;
+    font-size: 30px;
+    color: white;
+    display: flex;
+    flex-direction: row;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+.menu-icon {
+    width: 55px;
+    margin: 15px;
+}
+
+.map {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+.map-canvas {
+    padding: 20px;
+    margin-top: 5vh;
+}
+
+
+
+
+
+.controls-wrapper > * {
+    pointer-events: auto;
+}
+
+/* ========== ОБЩИЙ СТИЛЬ ДЛЯ ВСЕХ СВИТЧЕРОВ ========== */
+.floor-switcher,
+.date-switcher,
+.pair-switcher {
+    display: flex;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 60px;
+    padding: 6px;
+    gap: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Базовый стиль для всех кнопок свитчеров */
+.floor-btn,
+.date-btn,
+.pair-btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: #666;
+    text-align: center;
+}
+
+.floor-btn,
+.date-btn {
+    padding: 8px 24px;
+    font-size: 15px;
+}
+
+.pair-btn {
+    padding: 6px 16px;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.pair-btn .pair-time {
+    font-size: 10px;
+    font-weight: 400;
+    display: block;
+    opacity: 0.7;
+}
+
+/* Активное состояние */
+.floor-btn.active,
+.date-btn.active,
+.pair-btn.active {
+    background: #333333;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.pair-btn.active .pair-time {
+    opacity: 0.9;
+}
+
+/* Ховер состояние */
+.floor-btn:not(.active):hover,
+.date-btn:not(.active):hover,
+.pair-btn:not(.active):hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+/* Специальная кнопка выбора даты */
+.date-picker-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ========== ПЕРЕКЛЮЧАТЕЛЬ ПАР (горизонтальный) ========== */
+.pair-switcher {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: calc(100vw - 40px);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.pair-switcher::-webkit-scrollbar {
+    height: 3px;
+}
+
+.pair-switcher::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.pair-switcher::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+/* ========== МОДАЛЬНОЕ ОКНО ПОЛЬЗОВАТЕЛЯ ========== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 5% auto;
+    padding: 2%;
+    width: 90%;
+    gap: 20px;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.modalIcon {
+    height: 30px;
+}
+
+.modal-content button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    padding: 10px 20px;
+    width: 100%;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.modal-content button:hover {
+    background: #f0f0f0;
+}
+
+/* ========== МОДАЛЬНОЕ ОКНО КОМНАТЫ ========== */
+#myModalRoom .modal-content {
+    position: fixed;
+    width: 320px;
+    min-height: 380px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    padding: 25px 20px;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    box-shadow: none;
+}
+
+#myModalRoom {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#myModalRoom .close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+    transition: 0.2s;
+    z-index: 10;
+}
+
+#myModalRoom .close:hover {
+    color: #666;
+}
+
+#myModalRoom .cabinet {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    text-align: center;
+    width: 100%;
+    color: #000000;
+    margin: 0 0 10px 0;
+}
+
+/* Поля ввода в модалке комнаты */
+.date-field,
+.time-field {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.date-field label,
+.time-field label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: #666;
+}
+
+.date-field input,
+.time-field select {
+    width: 90%;
+    padding: 12px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    background: #f8f8f8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.date-field input:focus,
+.time-field select:focus {
+    outline: none;
+    border-color: #000;
+    background: #fff;
+}
+
+.weekday {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #888;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.time-field select {
+    width: 100%;
+}
+
+/* Кнопка бронирования */
+#myModalRoom .makeBron {
+    width: 100%;
+    background: #000000;
+    border: none;
+    border-radius: 30px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    text-align: center;
+    color: #FFFFFF;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+#myModalRoom .makeBron:hover {
+    background: #333333;
+    transform: scale(1.02);
+}
+
+#myModalRoom .makeBron:active {
+    transform: scale(0.98);
+}
+
+/* ========== КАСТОМНОЕ МОДАЛЬНОЕ ОКНО ДЛЯ ДАТЫ ========== */
+.custom-date-modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-date-modal.show {
+    display: flex;
+}
+
+.custom-date-content {
+    background: white;
+    border-radius: 30px;
+    padding: 25px;
+    width: 300px;
+    text-align: center;
+    border: 2px solid #000;
+}
+
+.custom-date-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.custom-date-header h3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.close-date-modal {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.2s;
+}
+
+.close-date-modal:hover {
+    color: #000;
+}
+
+.custom-date-input {
+    width: 90%;
+    padding: 12px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    background: #f8f8f8;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.custom-date-input:focus {
+    outline: none;
+    border-color: #000;
+    background: #fff;
+}
+
+.apply-date-btn {
+    width: 100%;
+    background: #000000;
+    border: none;
+    border-radius: 30px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #FFFFFF;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.apply-date-btn:hover {
+    background: #333333;
+    transform: scale(1.02);
+}
+
+/* ========== АНИМАЦИИ ========== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Модальное окно расписания - увеличенный размер */
+.schedule-modal .modal-content {
+    max-width: 900px;
+    width: 90%;
+    min-width: 320px;
+}
+
+.schedule-content {
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 30px 25px;
+}
+
+.schedule-content h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    text-align: center;
+}
+
+.schedule-date {
+    text-align: center;
+    font-size: 23px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 25px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 12px;
+}
+
+.viewScheduleBtn{
+    display: flex;
+    justify-content: center;
+}
+
+.schedule-table-container {
+    overflow-x: auto;
+    margin: 0 -5px;
+    padding: 0 5px;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    min-width: 500px;
+}
+
+.schedule-table th,
+.schedule-table td {
+    border: 1px solid #ddd;
+    padding: 14px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.schedule-table th {
+    background: #f5f5f5;
+    font-weight: 700;
+    font-size: 15px;
+    position: sticky;
+    top: 0;
+}
+
+.schedule-table td.busy {
+    background: rgba(128, 128, 128, 0.1);
+}
+
+.schedule-table td.free {
+    background: rgba(76, 175, 80, 0.08);
+}
+
+.pair-number {
+    font-weight: 700;
+    text-align: center;
+    width: 70px;
+    font-size: 16px;
+}
+
+.pair-time {
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+    width: 110px;
+}
+
+.subject-name {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.teacher-name {
+    color: #555;
+    font-size: 14px;
+}
+
+/* Увеличенное модальное окно комнаты */
+#myModalRoom .modal-content {
+    position: fixed;
+    width: 400px;
+    min-height: 420px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    padding: 30px 25px;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    box-shadow: none;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.status-busy {
+    background: rgba(128, 128, 128, 0.2);
+    color: #555;
+}
+
+.status-free {
+    background: rgba(76, 175, 175, 0.2);
+    color: #2e7d32;
+}
+
+/* Кнопка закрытия - скрыта */
+.close-schedule {
+    display: none;
+}
+
+/* Модальное окно пользователя - маленькое, в левом верхнем углу */
+.modalUser {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(3px);
+}
+
+.modalUser .modal-content {
+    position: fixed;
+    left: 20px;
+    top: 80px;
+    margin: 0;
+    width: 280px;
+    max-width: 90%;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid #e0e0e0;
+}
+
+.user-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+}
+
+.modal-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+    text-align: center;
+}
+
+.auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Кнопки авторизации как ссылки */
+.login-btn, .register-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    padding: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.login-btn {
+    background: #333333;
+    color: white;
+    border: none;
+}
+
+.register-btn {
+    background: white;
+    color: #333333;
+    border: 1.5px solid #333333;
+}
+
+.guest-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #888;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Убираем эффекты ховера */
+.login-btn:hover,
+.register-btn:hover,
+.guest-btn:hover {
+    transform: scale(1.03);
+}
+
+.login-btn:hover {
+    background: #333333;
+    color: white;
+}
+
+.register-btn:hover {
+    background: white;
+    color: #333333;
+    border: 1.5px solid #333333;
+}
+
+.guest-btn:hover {
+    color: #888;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 600px) {
+    .modalUser .modal-content {
+        left: 10px;
+        top: 70px;
+        width: 260px;
+        padding: 16px;
+    }
+    
+    .login-btn, .register-btn {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .modal-title {
+        font-size: 16px;
+    }
+}
+
+
+/* Адаптив */
+@media (max-width: 600px) {
+    .schedule-table th,
+    .schedule-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+    
+    .schedule-content h2 {
+        font-size: 18px;
+    }
+}
+
+/* ========== АДАПТИВ ========== */
+@media (max-width: 900px) {
+    .controls-wrapper {
+        gap: 10px;
+        padding: 10px 16px;
+    }
+    
+    .floor-btn,
+    .date-btn {
+        padding: 6px 18px;
+        font-size: 14px;
+    }
+    
+    .pair-btn {
+        padding: 5px 14px;
+        font-size: 12px;
+    }
+    
+    .pair-btn .pair-time {
+        font-size: 9px;
+    }
+    
+    .container {
+        margin-top: 160px;
+    }
+}
+
+@media (max-width: 768px) {
+    .controls-wrapper {
+        top: 10px;
+        gap: 8px;
+    }
+    
+    .floor-btn,
+    .date-btn {
+        padding: 5px 16px;
+        font-size: 13px;
+    }
+    
+    .floor-switcher,
+    .date-switcher {
+        padding: 4px;
+    }
+    
+    .pair-switcher {
+        padding: 4px;
+        gap: 3px;
+    }
+    
+    .pair-btn {
+        padding: 4px 12px;
+        font-size: 11px;
+    }
+    
+    .container {
+        margin-top: 170px;
+    }
+}
+
+@media (max-width: 600px) {
+    .controls-wrapper {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .pair-btn .pair-time {
+        display: none;
+    }
+    
+    .pair-btn {
+        padding: 6px 14px;
+        font-size: 13px;
+    }
+    
+    .container {
+        margin-top: 180px;
+    }
+    
+    #myModalRoom .modal-content {
+        width: 90%;
+        min-height: auto;
+        padding: 20px;
+    }
+    
+    #myModalRoom .cabinet {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .floor-btn,
+    .date-btn {
+        padding: 5px 14px;
+        font-size: 12px;
+    }
+    
+    .container {
+        margin-top: 190px;
+    }
+}

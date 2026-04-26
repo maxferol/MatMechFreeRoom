@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="stylesheet" href="MainPage.css">
+
+    <title>MathMech Rooms</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+</head>
+
+<body>
+    <div class="menu">
+        <button id="openModalBtn" class="modal-btn user-button">
+            <img src="icons/user.png" class="menu-icon user-icon">
+        </button>
+        <div id="myModal" class="modal modalUser">
+            <div class="modal-content user-modal-content">
+                <h3 class="modal-title">Вход в аккаунт</h3>
+                <div class="auth-buttons">
+                    <a href="Login.html" class="login-btn">Вход</a>
+                    <a href="Registration.html" class="register-btn">Регистрация</a>
+                </div>
+                <div class="guest-link">
+                    <a href="http://192.168.1.45:8080/frontend/MainPage.html" class="guest-btn">Продолжить как гость</a>
+                </div>
+            </div>
+        </div>
+        <a class="menuTime">MatmechMaps |&nbsp;
+            <div id="current-schedule"> Загрузка...</div>
+        </a>
+        <button class="search-button">
+        </button>
+    </div>
+    <script src="Modalscript.js"></script>
+
+
+    <div class="map">
+        <div class="controls-wrapper">
+            <div class="floor-switcher">
+                <button class="floor-btn floor-5" data-floor="5">5 этаж</button>
+                <button class="floor-btn floor-6 active" data-floor="6">6 этаж</button>
+            </div>
+
+            <div class="date-switcher">
+                <button class="date-btn active" data-days="0">Сегодня</button>
+                <button class="date-btn" data-days="1">Завтра</button>
+                <button class="date-btn date-picker-btn" id="customDateBtn">📅 Выбрать</button>
+            </div>
+
+            <div class="pair-switcher">
+                <button class="pair-btn" data-pair="1">1 пара<br><span class="pair-time">9:00-10:30</span></button>
+                <button class="pair-btn" data-pair="2">2 пара<br><span class="pair-time">10:40-12:10</span></button>
+                <button class="pair-btn" data-pair="3">3 пара<br><span class="pair-time">12:50-14:20</span></button>
+                <button class="pair-btn" data-pair="4">4 пара<br><span class="pair-time">14:30-16:00</span></button>
+                <button class="pair-btn" data-pair="5">5 пара<br><span class="pair-time">16:10-17:40</span></button>
+                <button class="pair-btn" data-pair="6">6 пара<br><span class="pair-time">17:50-19:20</span></button>
+            </div>
+        </div>
+
+        <div id="customDateModal" class="custom-date-modal">
+            <div class="custom-date-content">
+                <div class="custom-date-header">
+                    <h3>Выбрать дату</h3>
+                    <button class="close-date-modal">&times;</button>
+                </div>
+                <input type="date" id="customDateInput" class="custom-date-input">
+                <button id="applyCustomDate" class="apply-date-btn">Применить</button>
+            </div>
+        </div>
+
+        <canvas id="c" class="container map-canvas map-6" height="600px"></canvas>
+    </div>
+
+
+    <div id="myModalRoom" class="modal">
+        <div class="modal-content">
+
+            <div class="cabinet">Кабинет 621</div>
+
+            <div class="date-field">
+                <label>Дата:</label>
+                <input type="date" id="bookingDate" value="">
+                <script>
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0];
+                    document.getElementById('bookingDate').value = formattedDate;
+                </script>
+                <span class="weekday">(пн)</span>
+            </div>
+
+            <div class="time-field">
+                <label>Пара:</label>
+                <div class="time-select">
+                    <select id="bookingTime current-schedule">
+                        <option value="1 pair">9:00 - 10:30</option>
+                        <option value="10:40-12:10">10:40 - 12:10</option>
+                        <option value="12:50-14:20">12:50 - 14:20</option>
+                        <option value="14:30-16:00">14:30 - 16:00</option>
+                        <option value="15:40-17:10">16:10 - 17:40</option>
+                        <option value="17:20-18:50">17:50 - 19:20</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="makeBron">Забронировать</button>
+            <button class="viewScheduleBtn">📅 Смотреть расписание</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно с расписанием на текущий день -->
+    <div id="scheduleModal" class="modal schedule-modal">
+        <div class="modal-content schedule-content">
+            <span class="close-schedule">&times;</span>
+            <h2 id="scheduleRoomTitle">Расписание кабинета</h2>
+            <div id="scheduleDate" class="schedule-date"></div>
+            <div class="schedule-table-container">
+                <table class="schedule-table" id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Пара</th>
+                            <th>Время</th>
+                            <th>Предмет</th>
+                            <th>Преподаватель</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <!-- Данные будут загружены динамически -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="map.js" defer></script>
+    <script src="time.js" defer></script>
+    <script src="timeSwitcher.js" defer></script>
+</body>

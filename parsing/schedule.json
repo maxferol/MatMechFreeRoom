@@ -1,0 +1,34 @@
+{
+    "621": {
+        "1": {
+            "subject": "Математический анализ",
+            "teacher": "Иванов И.И.",
+            "room": "621"
+        },
+        "2": {
+            "subject": "Линейная алгебра",
+            "teacher": "Петров П.П.",
+            "room": "621"
+        },
+        "3": {
+            "subject": null,
+            "teacher": null,
+            "room": null
+        },
+        "4": {
+            "subject": "Дифференциальные уравнения",
+            "teacher": "Сидоров С.С.",
+            "room": "621"
+        },
+        "5": {
+            "subject": null,
+            "teacher": null,
+            "room": null
+        },
+        "6": {
+            "subject": null,
+            "teacher": null,
+            "room": null
+        }
+    }
+}
