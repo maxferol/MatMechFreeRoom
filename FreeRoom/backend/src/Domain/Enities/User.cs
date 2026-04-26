@@ -1,12 +1,14 @@
 ﻿using System;
 using FreeRoom.backend.src.Domain.Value_Object.User;
 using FreeRoom.backend.src.Domain.Enum;
+using FreeRoom.backend.src.Infrastructure.GetEntitiesId;
 
 namespace FreeRoom.backend.src.Domain.Enities;
 
 public class User
 {
     public Login Login { get; private set;}
+    public UserId Id { get; private set; } = default!;
     public PasswordHash PasswordHash { get; private set; }
     public UserRole Role { get; private set;}
 

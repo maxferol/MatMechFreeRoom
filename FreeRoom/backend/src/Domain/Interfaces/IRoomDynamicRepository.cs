@@ -4,16 +4,13 @@ namespace FreeRoom.backend.src.Domain.Interfaces;
 
 public interface IRoomDynamicRepository
 {
-    Task<List<RoomDynamic>> GetBySubjectId(Guid subjectId);
-    Task<List<RoomDynamic>> GetAll();
-    Task<RoomDynamic?> GetByNameRoomDynamic(string nameRoomDynamic);
-    Task<bool> DeleteRoomDynamic(Guid id);
+    Task<RoomDynamic> CreateRoomDynamic(RoomDynamic roomDynamic);
     Task<RoomDynamic?> GetByIdRoomDynamic(Guid id);
-    Task<RoomDynamic> CreateRoomDynamic(RoomDynamic material);
-    
-    Task<RoomDynamic?> UpdateRoomDynamic(RoomDynamic material);
-    Task<List<RoomDynamic>> SearchAsync(string searchText);
-    
+    Task<RoomDynamic?> GetByNumberRoomDynamic(string RoomDynamicNumber);
+    Task<RoomDynamic?> UpdateRoomDynamic(RoomDynamic roomDynamic);
+    Task<List<RoomDynamic>> GetAll();
+    Task<RoomDynamic> Create(RoomDynamic roomDynamic);
+    Task<bool> DeleteRoomDynamic(Guid id);
     Task<bool> IncrementViewCountAsync(Guid id);
-    Task<bool> IncrementDownloadCountAsync(Guid id);
+
 }

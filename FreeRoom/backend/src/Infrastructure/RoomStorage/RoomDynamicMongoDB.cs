@@ -3,13 +3,16 @@ using FreeRoom.backend.src.Domain.Enities;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
+using FreeRoom.backend.src.Infrastructure.GetEntitiesId;
+using FreeRoom.backend.src.Domain.Value_Object.RoomStatic;
+using FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
 
 namespace FreeRoom.backend.src.Infrastructure.RoomStorage;
 
 public class RoomDynamicMongoDB : IRoomDynamicRepository
 {
     private readonly IMongoCollection<BsonDocument> CollectionRoomDynamic;
-    
     public RoomDynamicMongoDB(string connectionString, string databaseName)
     {
         var client = new MongoClient(connectionString);
@@ -58,22 +61,13 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         {
             if (roomDynamic == null)
                 throw new ArgumentNullException(nameof(roomDynamic), "RoomDynamic не должен быть null");
-            
             var bsonDocument = new BsonDocument
             {
                 { "roomDynamicId", roomDynamic.Id.Value.ToString() },
-                { "subjectId", roomDynamic.SubjectId.Value.ToString() },
+                { "roomStaticId", roomDynamic.RoomStaticId.Value.ToString() },
                 { "userId", roomDynamic.UserId.Value.ToString() },
-                { "name", roomDynamic.Name.Value },
-                { "year", roomDynamic.Year.Value },
-                { "semester", roomDynamic.Semester.Value },
-                { "description", roomDynamic.Description },
-                { "size", roomDynamic.Size.Size },
-                { "roomDynamicType", roomDynamic.roomDynamicType.ToString() },
-                { "filePath", roomDynamic.FilePath.Value },
-                { "uploadedAt", roomDynamic.UploadedAt },
-                { "viewCount", roomDynamic.ViewCount },
-                { "downloadCount", roomDynamic.DownloadCount }
+                { "lessonNumber", roomDynamic.LessonNumber.Value },
+                { "bookingDate", roomDynamic.BookingDate.Value }
             };
             
             await CollectionRoomDynamic.InsertOneAsync(bsonDocument);
@@ -104,11 +98,11 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
     }
     
-    public async Task<RoomDynamic?> GetByNameRoomDynamic(string RoomDynamicName)
+    public async Task<RoomDynamic?> GetByNumberRoomDynamic(string RoomDynamicNumber)
     {
         try
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("name", RoomDynamicName);
+            var filter = Builders<BsonDocument>.Filter.Eq("name", RoomDynamicNumber);
             var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
             if (document == null)
                 return null;
@@ -116,26 +110,26 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
         catch (Exception ex)
         {
-            throw new Exception($"Ошибка при получении аудитории: {ex.Message}", ex);
+            throw new Exception($"Ошибка при получении аудитории по номеру: {ex.Message}", ex);
         }
     }
 
-    public async Task<List<RoomDynamic>> GetBySubjectId(Guid subjectId)
-    {
-        try
-        {
-            var filter = Builders<BsonDocument>.Filter.Eq("subjectId", subjectId.ToString());
-            var documents = await CollectionRoomDynamic.Find(filter).ToListAsync();
-            return documents.Select(MapToRoomDynamic).ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при получении материалов по subjectId: {ex.Message}");
-            return new List<RoomDynamic>();
-        }
-    }
+    // public async Task<List<RoomDynamic>> GetBySubjectId(Guid subjectId)
+    // {
+    //     try
+    //     {
+    //         var filter = Builders<BsonDocument>.Filter.Eq("subjectId", subjectId.ToString());
+    //         var documents = await CollectionRoomDynamic.Find(filter).ToListAsync();
+    //         return documents.Select(MapToRoomDynamic).ToList();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Ошибка при получении материалов по subjectId: {ex.Message}");
+    //         return new List<RoomDynamic>();
+    //     }
+    // }
 
-    public async Task<RoomDynamic?> UpdateRoomDynamic(RoomDynamic roomDynamic)
+    public async Task<RoomDynamic?> UpdateRoomDynamic(RoomDynamic roomDynamic) //пока херня
     {
         try
         {
@@ -167,40 +161,40 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка при получении всех материалов: {ex.Message}");
+            Console.WriteLine($"Ошибка при получении всех аудиторий: {ex.Message}");
         }
         return result;
     }
 
-    public async Task<List<RoomDynamic>> SearchAsync(string searchText)
-    {
-        var result = new List<RoomDynamic>();
-        try
-        {
-            var filter = Builders<BsonDocument>.Filter.Regex("name", new BsonRegularExpression(searchText, "i")) |
-                         Builders<BsonDocument>.Filter.Regex("description", new BsonRegularExpression(searchText, "i"));
+    // public async Task<List<RoomDynamic>> SearchAsync(string searchText)
+    // {
+    //     var result = new List<RoomDynamic>();
+    //     try
+    //     {
+    //         var filter = Builders<BsonDocument>.Filter.Regex("name", new BsonRegularExpression(searchText, "i")) |
+    //                      Builders<BsonDocument>.Filter.Regex("description", new BsonRegularExpression(searchText, "i"));
+    //
+    //         var documents = await CollectionRoomDynamic.Find(filter).ToListAsync();
+    //         foreach (var doc in documents)
+    //         {
+    //             try
+    //             {
+    //                 result.Add(MapToRoomDynamic(doc));
+    //             }
+    //             catch (Exception ex)
+    //             {
+    //                 Console.WriteLine($"Ошибка маппинга документа {doc.GetValue("_id", "unknown")}: {ex.Message}");
+    //             }
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Ошибка при поиске материалов: {ex.Message}");
+    //     }
+    //     return result;
+    // }
 
-            var documents = await CollectionRoomDynamic.Find(filter).ToListAsync();
-            foreach (var doc in documents)
-            {
-                try
-                {
-                    result.Add(MapToRoomDynamic(doc));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Ошибка маппинга документа {doc.GetValue("_id", "unknown")}: {ex.Message}");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при поиске материалов: {ex.Message}");
-        }
-        return result;
-    }
-
-    public Task<RoomDynamic> Create(RoomDynamic roomDynamic)
+    public Task<RoomDynamic> Create(RoomDynamic roomDynamic) // пока херня
     {
         throw new NotImplementedException();
     }
@@ -215,36 +209,33 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
         catch (Exception ex)
         {
-            throw new Exception($"Ошибка при удалении материала: {ex.Message}", ex);
+            throw new Exception($"Ошибка при удалении аудитории: {ex.Message}", ex);
         }
     }
 
     private static RoomDynamic MapToRoomDynamic(BsonDocument document)
     {
-        var name = new roomDynamicName(document["name"].AsString);
-        var subjectId = new SubjectId(Guid.Parse(document["subjectId"].AsString));
+        // 1. Создаем необходимые Value Objects из документа
+        var roomStaticId = new RoomStaticId(Guid.Parse(document["roomStaticId"].AsString));
         var userId = new UserId(Guid.Parse(document["userId"].AsString));
-        var year = new StudyYear(document["year"].AsInt32);
-        var size = new roomDynamicSize(document["size"].AsInt64);
-        var roomDynamicType = Enum.Parse<roomDynamicType>(document["roomDynamicType"].AsString, ignoreCase: true);
-        var filePath = new ResourceLocation(document["filePath"].AsString);
-        var filePathIcon = new ResourceLocation(document["filePathIcon"].AsString);
-        
-        var semester = new Semester(document.Contains("semester") ? document["semester"].AsInt32 : 1);
-        var description = document.Contains("description") ? document["description"].AsString : string.Empty;
+        var lessonNumber = new LessonNumber(document["lessonNumber"].AsInt32);
+        var bookingDate = new BookingDate(document["bookingDate"].ToUniversalTime());
 
-        var roomDynamic = new RoomDynamic(name, subjectId, userId, year, semester, description, size, roomDynamicType, filePath, filePathIcon);
-        
+        // 2. Вызываем приватный конструктор через рефлексию
+        var roomDynamic = (RoomDynamic)Activator.CreateInstance(
+            typeof(RoomDynamic), 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, 
+            null, 
+            new object[] { roomStaticId, userId, lessonNumber, bookingDate }, 
+            null)!;
+
+        // 3. Устанавливаем Id (так как он не в конструкторе, а инициализируется отдельно)
         var idProperty = typeof(RoomDynamic).GetProperty("Id");
-        var uploadedAtProperty = typeof(RoomDynamic).GetProperty("UploadedAt");
-        
-        idProperty?.SetValue(roomDynamic, new RoomDynamicId(Guid.Parse(document["roomDynamicId"].AsString)));
-        uploadedAtProperty?.SetValue(roomDynamic, document["uploadedAt"].ToUniversalTime());
-        
-        var viewCountProperty = typeof(RoomDynamic).GetProperty("ViewCount");
-        var downloadCountProperty = typeof(RoomDynamic).GetProperty("DownloadCount");
-        viewCountProperty?.SetValue(roomDynamic, document.Contains("viewCount") ? document["viewCount"].AsInt32 : 0);
-        downloadCountProperty?.SetValue(roomDynamic, document.Contains("downloadCount") ? document["downloadCount"].AsInt32 : 0);
+        if (document.Contains("roomDynamicId"))
+        {
+            var idValue = new RoomDynamicId(Guid.Parse(document["roomDynamicId"].AsString));
+            idProperty?.SetValue(roomDynamic, idValue);
+        }
 
         return roomDynamic;
     }
@@ -260,24 +251,24 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка при увеличении счетчика просмотров: {ex.Message}");
+            Console.WriteLine($"Ошибка при увеличении счетчика бронирований: {ex.Message}");
             return false;
         }
     }
 
-    public async Task<bool> IncrementDownloadCountAsync(Guid id)
-    {
-        try
-        {
-            var filter = Builders<BsonDocument>.Filter.Eq("roomDynamicId", id.ToString());
-            var update = Builders<BsonDocument>.Update.Inc("downloadCount", 1);
-            var result = await CollectionRoomDynamic.UpdateOneAsync(filter, update);
-            return result.ModifiedCount > 0;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при увеличении счетчика скачиваний: {ex.Message}");
-            return false;
-        }
-    }
+    // public async Task<bool> IncrementDownloadCountAsync(Guid id)
+    // {
+    //     try
+    //     {
+    //         var filter = Builders<BsonDocument>.Filter.Eq("roomDynamicId", id.ToString());
+    //         var update = Builders<BsonDocument>.Update.Inc("downloadCount", 1);
+    //         var result = await CollectionRoomDynamic.UpdateOneAsync(filter, update);
+    //         return result.ModifiedCount > 0;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Ошибка при увеличении счетчика скачиваний: {ex.Message}");
+    //         return false;
+    //     }
+    // }
 }

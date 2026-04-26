@@ -8,7 +8,7 @@ public class LessonNumber
     
     //private LessonNumber() { }
 
-    private LessonNumber(int value)
+    public LessonNumber(int value)
     {
         if (value < MinLessonNumber || value > MaxLessonNumber)
             throw new ArgumentOutOfRangeException($"Номер пары не попадает в заданный диапазон: [{MinLessonNumber},{MaxLessonNumber}]",nameof(value));
