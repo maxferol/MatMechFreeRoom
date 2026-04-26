@@ -34,21 +34,50 @@
                     Мои брони</button>
             </div>
         </div>
-        <a class="menuTime">MatmechMaps |        
-            <div id="current-schedule"> Загрузка...</div></a>
+        <a class="menuTime">MatmechMaps |&nbsp;
+            <div id="current-schedule"> Загрузка...</div>
+        </a>
         <button class="search-button">
-            <img src="icons/search.png" class="menu-icon search-icon">
         </button>
     </div>
     <script src="Modalscript.js"></script>
 
+
     <div class="map">
-        <div class="floor-switcher">
-            <button class="floor-btn floor-5" data-floor="5">5 этаж</button>
-            <button class="floor-btn floor-6 active" data-floor="6">6 этаж</button>
+        <div class="controls-wrapper">
+            <div class="floor-switcher">
+                <button class="floor-btn floor-5" data-floor="5">5 этаж</button>
+                <button class="floor-btn floor-6 active" data-floor="6">6 этаж</button>
+            </div>
+
+            <div class="date-switcher">
+                <button class="date-btn active" data-days="0">Сегодня</button>
+                <button class="date-btn" data-days="1">Завтра</button>
+                <button class="date-btn date-picker-btn" id="customDateBtn">📅 Выбрать</button>
+            </div>
+
+            <div class="pair-switcher">
+                <button class="pair-btn" data-pair="1">1 пара<br><span class="pair-time">9:00-10:30</span></button>
+                <button class="pair-btn" data-pair="2">2 пара<br><span class="pair-time">10:40-12:10</span></button>
+                <button class="pair-btn" data-pair="3">3 пара<br><span class="pair-time">12:50-14:20</span></button>
+                <button class="pair-btn" data-pair="4">4 пара<br><span class="pair-time">14:30-16:00</span></button>
+                <button class="pair-btn" data-pair="5">5 пара<br><span class="pair-time">16:10-17:40</span></button>
+                <button class="pair-btn" data-pair="6">6 пара<br><span class="pair-time">17:50-19:20</span></button>
+            </div>
         </div>
+
+        <div id="customDateModal" class="custom-date-modal">
+            <div class="custom-date-content">
+                <div class="custom-date-header">
+                    <h3>Выбрать дату</h3>
+                    <button class="close-date-modal">&times;</button>
+                </div>
+                <input type="date" id="customDateInput" class="custom-date-input">
+                <button id="applyCustomDate" class="apply-date-btn">Применить</button>
+            </div>
+        </div>
+
         <canvas id="c" class="container map-canvas map-6" height="600px"></canvas>
-        <canvas id="c" class="container map-canvas map-5" height="600px"></canvas>
     </div>
 
 
@@ -59,18 +88,23 @@
 
             <div class="date-field">
                 <label>Дата:</label>
-                <input type="date" id="bookingDate" value="2026-04-13">
+                <input type="date" id="bookingDate" value="">
+                <script>
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0];
+                    document.getElementById('bookingDate').value = formattedDate;
+                </script>
                 <span class="weekday">(пн)</span>
             </div>
 
             <div class="time-field">
                 <label>Пара:</label>
                 <div class="time-select">
-                    <select id="bookingTime">
-                        <option value="9:00-10:30">9:00 - 10:30</option>
+                    <select id="bookingTime current-schedule">
+                        <option value="1 pair">9:00 - 10:30</option>
                         <option value="10:40-12:10">10:40 - 12:10</option>
-                        <option value="12:20-13:50">12:50 - 14:20</option>
-                        <option value="14:00-15:30">14:30 - 16:00</option>
+                        <option value="12:50-14:20">12:50 - 14:20</option>
+                        <option value="14:30-16:00">14:30 - 16:00</option>
                         <option value="15:40-17:10">16:10 - 17:40</option>
                         <option value="17:20-18:50">17:50 - 19:20</option>
                     </select>
@@ -78,8 +112,45 @@
             </div>
 
             <button class="makeBron">Забронировать</button>
+            <button class="viewScheduleBtn">📅 Смотреть расписание</button>
         </div>
     </div>
+
+    <div id="scheduleModal" class="modal schedule-modal">
+        <div class="modal-content schedule-content">
+            <span class="close-schedule">&times;</span>
+            <h2 id="scheduleRoomTitle">Расписание кабинета</h2>
+            <div class="schedule-week-switcher">
+                <button class="week-btn active" data-week-offset="0">Текущая неделя</button>
+                <button class="week-btn" data-week-offset="1">Следующая неделя</button>
+            </div>
+            <div class="schedule-table-container">
+                <table class="schedule-table" id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Пара</th>
+                            <th>Время</th>
+                            <th>ПН</th>
+                            <th>ВТ</th>
+                            <th>СР</th>
+                            <th>ЧТ</th>
+                            <th>ПТ</th>
+                            <th>СБ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <!-- Данные будут загружены динамически -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="schedule-note">
+                <span class="busy-cell">📖</span> - Занято (есть пара)
+                <span class="free-cell">✅</span> - Свободно
+            </div>
+        </div>
+    </div>
+
     <script src="map.js" defer></script>
     <script src="time.js" defer></script>
+    <script src="timeSwitcher.js" defer></script>
 </body>
