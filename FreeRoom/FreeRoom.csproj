@@ -9,7 +9,8 @@
 
     <ItemGroup>
       <Folder Include="backend\src\Api\" />
-      <Folder Include="backend\src\Application\" />
+      <Folder Include="backend\src\Application\Rooms\Queries\" />
+      <Folder Include="backend\src\Application\Users\" />
       <Folder Include="backend\src\Infrastructure\Authentication\" />
     </ItemGroup>
 

@@ -13,3 +13,12 @@ C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\refint\
 C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.pdb
 C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.genruntimeconfig.cache
 C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\ref\FreeRoom.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\DnsClient.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\MongoDB.Bson.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\MongoDB.Driver.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\SharpCompress.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\Snappier.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\bin\Debug\net8.0\ZstdSharp.dll
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.csproj.AssemblyReference.cache
+C:\Аудитории\MatMechFreeRoom\FreeRoom\FreeRoom\obj\Debug\net8.0\FreeRoom.csproj.Up2Date
