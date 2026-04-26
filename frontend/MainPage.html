@@ -22,16 +22,15 @@
             <img src="icons/user.png" class="menu-icon user-icon">
         </button>
         <div id="myModal" class="modal modalUser">
-            <div class="modal-content">
-                <button class="myTable-btn">
-                    <img src="icons/list.png" class="modalIcon">
-                    Мое расписание</button>
-                <button class="addBron-btn">
-                    <img src="icons/add.png" class="modalIcon">
-                    Добавить бронь</button>
-                <button class="myBron-btn">
-                    <img src="icons/list.png" class="modalIcon">
-                    Мои брони</button>
+            <div class="modal-content user-modal-content">
+                <h3 class="modal-title">Вход в аккаунт</h3>
+                <div class="auth-buttons">
+                    <a href="Login.html" class="login-btn">Вход</a>
+                    <a href="Registration.html" class="register-btn">Регистрация</a>
+                </div>
+                <div class="guest-link">
+                    <a href="http://192.168.1.45:8080/frontend/MainPage.html" class="guest-btn">Продолжить как гость</a>
+                </div>
             </div>
         </div>
         <a class="menuTime">MatmechMaps |&nbsp;
@@ -117,29 +116,29 @@
     </div>
 
     <!-- Модальное окно с расписанием на текущий день -->
-<div id="scheduleModal" class="modal schedule-modal">
-    <div class="modal-content schedule-content">
-        <span class="close-schedule">&times;</span>
-        <h2 id="scheduleRoomTitle">Расписание кабинета</h2>
-        <div id="scheduleDate" class="schedule-date"></div>
-        <div class="schedule-table-container">
-            <table class="schedule-table" id="scheduleTable">
-                <thead>
-                    <tr>
-                        <th>Пара</th>
-                        <th>Время</th>
-                        <th>Предмет</th>
-                        <th>Преподаватель</th>
-                        <th>Статус</th>
-                    </tr>
-                </thead>
-                <tbody id="scheduleTableBody">
-                    <!-- Данные будут загружены динамически -->
-                </tbody>
-            </table>
+    <div id="scheduleModal" class="modal schedule-modal">
+        <div class="modal-content schedule-content">
+            <span class="close-schedule">&times;</span>
+            <h2 id="scheduleRoomTitle">Расписание кабинета</h2>
+            <div id="scheduleDate" class="schedule-date"></div>
+            <div class="schedule-table-container">
+                <table class="schedule-table" id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Пара</th>
+                            <th>Время</th>
+                            <th>Предмет</th>
+                            <th>Преподаватель</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <!-- Данные будут загружены динамически -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
     <script src="map.js" defer></script>
     <script src="time.js" defer></script>

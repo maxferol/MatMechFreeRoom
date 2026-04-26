@@ -33,31 +33,6 @@ function handleEscapeKey(event) {
     }
 }
 
-// Обработчики для кнопок меню
-const myTableBtn = document.querySelector('.myTable-btn');
-const addBronBtn = document.querySelector('.addBron-btn');
-const myBronBtn = document.querySelector('.myBron-btn');
-
-if (myTableBtn) {
-    myTableBtn.addEventListener('click', () => {
-        alert('Мое расписание - в разработке');
-        closeModal();
-    });
-}
-
-if (addBronBtn) {
-    addBronBtn.addEventListener('click', () => {
-        alert('Добавление брони - в разработке');
-        closeModal();
-    });
-}
-
-if (myBronBtn) {
-    myBronBtn.addEventListener('click', () => {
-        alert('Мои брони - в разработке');
-        closeModal();
-    });
-}
 
 // Назначаем обработчики
 if (openModalBtn) openModalBtn.addEventListener('click', openModal);

@@ -598,6 +598,129 @@ button:active {
     display: none;
 }
 
+/* Модальное окно пользователя - маленькое, в левом верхнем углу */
+.modalUser {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(3px);
+}
+
+.modalUser .modal-content {
+    position: fixed;
+    left: 20px;
+    top: 80px;
+    margin: 0;
+    width: 280px;
+    max-width: 90%;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid #e0e0e0;
+}
+
+.user-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+}
+
+.modal-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+    text-align: center;
+}
+
+.auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Кнопки авторизации как ссылки */
+.login-btn, .register-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    padding: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.login-btn {
+    background: #333333;
+    color: white;
+    border: none;
+}
+
+.register-btn {
+    background: white;
+    color: #333333;
+    border: 1.5px solid #333333;
+}
+
+.guest-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #888;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Убираем эффекты ховера */
+.login-btn:hover,
+.register-btn:hover,
+.guest-btn:hover {
+    transform: scale(1.03);
+}
+
+.login-btn:hover {
+    background: #333333;
+    color: white;
+}
+
+.register-btn:hover {
+    background: white;
+    color: #333333;
+    border: 1.5px solid #333333;
+}
+
+.guest-btn:hover {
+    color: #888;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 600px) {
+    .modalUser .modal-content {
+        left: 10px;
+        top: 70px;
+        width: 260px;
+        padding: 16px;
+    }
+    
+    .login-btn, .register-btn {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .modal-title {
+        font-size: 16px;
+    }
+}
 
 
 /* Адаптив */

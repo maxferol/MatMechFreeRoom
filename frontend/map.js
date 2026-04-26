@@ -11,13 +11,67 @@ window.onload = function () {
     let dragStartY = 0;
     let lastX = 0;
     let lastY = 0;
-    
+
     // Глобальные переменные для статусов
     let roomsStatus = {};
     let currentPair = null;
     let isDataLoaded = false;
     let currentFloor = 6; // Текущий этаж (6 или 5)
     let currentRooms = []; // Текущий массив комнат
+
+    // Добавьте в начало map.js, после объявления переменных
+    window.roomsStatus = roomsStatus;
+    window.currentPair = currentPair;
+
+    // Функция для получения занятых комнат (нужно реализовать запрос к бэкенду)
+    window.fetchBusyRooms = async function (date, pairNumber) {
+        try {
+            // TODO: заменить на реальный запрос к бэкенду
+            const response = await fetch(`/api/rooms/busy?date=${date}&pair=${pairNumber}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Ожидаем массив строк с названиями занятых комнат
+            if (data.busyRooms) {
+                return data.busyRooms;
+            } else if (Array.isArray(data)) {
+                return data;
+            }
+            return [];
+
+        } catch (error) {
+            console.error('Ошибка получения занятых комнат:', error);
+            return [];
+        }
+    };
+
+    // Функция обновления статусов комнат
+    window.updateRoomsStatus = function (busyRooms, pair) {
+        // Очищаем старые статусы
+        for (let key in roomsStatus) {
+            delete roomsStatus[key];
+        }
+
+        // Заполняем новыми
+        busyRooms.forEach(roomName => {
+            roomsStatus[roomName] = [pair];
+        });
+
+        // Обновляем глобальную переменную
+        window.roomsStatus = roomsStatus;
+    };
+
+    // Обновляем функцию hasClassNow, чтобы использовала roomsStatus
+    function hasClassNow(roomName) {
+        if (!currentPair) return false;
+        const roomStatus = roomsStatus[roomName];
+        if (!roomStatus) return false;
+        return roomStatus.includes(currentPair);
+    }
 
     const rooms_6 = [
         { name: "621", x: 897, y: 19, width: 130, height: 127, path: null },
@@ -51,7 +105,7 @@ window.onload = function () {
     ];
 
     const rooms_5 = [
-        { name: "513", x: 902, y: 19-15, width: 130, height: 127, path: null },
+        { name: "513", x: 902, y: 19 - 15, width: 130, height: 127, path: null },
         { name: "532", x: 1003, y: 172, width: 75, height: 128, path: null },
         { name: "538", x: 1145, y: 172, width: 70, height: 128, path: null },
         { name: "540", x: 1218, y: 172, width: 70, height: 128, path: null },
@@ -64,13 +118,13 @@ window.onload = function () {
         { name: "522", x: 620, y: 170, width: 90, height: 130, path: null },
         { name: "514", x: 390, y: 170, width: 135, height: 130, path: null },
 
-        { name: "501", x: 390, y: 19-15, width: 65, height: 125+5, path: null },
-        { name: "505", x: 455, y: 19-15, width: 65, height: 130, path: null },
-        { name: "507", x: 520, y: 19-15, width: 60+35, height: 130, path: null },
-        { name: "509", x: 653, y: 19-15, width: 140, height: 125+5, path: null },
-        { name: "511", x: 795, y: 19-15, width: 45+12, height: 125+5, path: null },
-        { name: "515", x: 1180, y: 19-15, width: 50, height: 100+5, path: null },
-        { name: "517", x: 1233, y: 19-15, width: 55, height: 100+5, path: null },
+        { name: "501", x: 390, y: 19 - 15, width: 65, height: 125 + 5, path: null },
+        { name: "505", x: 455, y: 19 - 15, width: 65, height: 130, path: null },
+        { name: "507", x: 520, y: 19 - 15, width: 60 + 35, height: 130, path: null },
+        { name: "509", x: 653, y: 19 - 15, width: 140, height: 125 + 5, path: null },
+        { name: "511", x: 795, y: 19 - 15, width: 45 + 12, height: 125 + 5, path: null },
+        { name: "515", x: 1180, y: 19 - 15, width: 50, height: 100 + 5, path: null },
+        { name: "517", x: 1233, y: 19 - 15, width: 55, height: 100 + 5, path: null },
     ];
 
     // Карты для разных этажей
@@ -86,13 +140,13 @@ window.onload = function () {
     function loadFloor(floor) {
         if (isLoading) return;
         isLoading = true;
-        
+
         const floorData = floorMaps[floor];
         if (!floorData) return;
-        
+
         currentFloor = floor;
         currentRooms = floorData.rooms;
-        
+
         // Обновляем активную кнопку
         document.querySelectorAll('.floor-btn').forEach(btn => {
             if (btn.dataset.floor == floor) {
@@ -101,7 +155,7 @@ window.onload = function () {
                 btn.classList.remove('active');
             }
         });
-        
+
         // Загружаем новую карту
         currentMapImage.onload = function () {
             updateRoomPaths(); // Обновляем пути для новых комнат
@@ -111,9 +165,9 @@ window.onload = function () {
                 draw();
             }
         };
-        
+
         currentMapImage.src = floorData.image;
-        currentMapImage.onerror = function() {
+        currentMapImage.onerror = function () {
             console.error('Ошибка загрузки карты для этажа', floor);
             isLoading = false;
         };
@@ -132,14 +186,14 @@ window.onload = function () {
     function getCurrentPair() {
         const now = new Date();
         const currentTime = now.getHours() * 60 + now.getMinutes();
-        
+
         if (currentTime >= 9 * 60 && currentTime < 10 * 60 + 30) return 1;
         if (currentTime >= 10 * 60 + 40 && currentTime < 12 * 60 + 10) return 2;
         if (currentTime >= 12 * 60 + 20 && currentTime < 13 * 60 + 50) return 3;
         if (currentTime >= 14 * 60 + 30 && currentTime < 16 * 60) return 4;
         if (currentTime >= 16 * 60 + 10 && currentTime < 17 * 60 + 40) return 5;
         if (currentTime >= 17 * 60 + 50 && currentTime < 19 * 60 + 20) return 6;
-        
+
         return null;
     }
 
@@ -168,7 +222,7 @@ window.onload = function () {
         roomsStatus = await loadRoomsStatus();
         currentPair = getCurrentPair();
         isDataLoaded = true;
-        
+
         setInterval(() => {
             const newPair = getCurrentPair();
             if (newPair !== currentPair) {
@@ -176,7 +230,7 @@ window.onload = function () {
                 draw();
             }
         }, 60000);
-        
+
         draw();
     }
 
@@ -198,17 +252,17 @@ window.onload = function () {
 
     function clampOffset() {
         if (!currentMapImage.complete) return;
-        
+
         const mapWidth = currentMapImage.width * scale;
         const mapHeight = currentMapImage.height * scale;
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
-        
+
         let minX = canvasWidth - mapWidth;
         let minY = canvasHeight - mapHeight;
         let maxX = 0;
         let maxY = 0;
-        
+
         if (mapWidth < canvasWidth) {
             minX = (canvasWidth - mapWidth) / 2;
             maxX = minX;
@@ -217,7 +271,7 @@ window.onload = function () {
             minY = (canvasHeight - mapHeight) / 2;
             maxY = minY;
         }
-        
+
         offsetX = Math.min(maxX, Math.max(minX, offsetX));
         offsetY = Math.min(maxY, Math.max(minY, offsetY));
     }
@@ -230,39 +284,39 @@ window.onload = function () {
     function draw() {
         if (!ctx || !currentMapImage.complete) return;
         if (!isDataLoaded) return;
-        
+
         canvas.width = canvas.width;
         ctx.save();
         ctx.translate(offsetX, offsetY);
         ctx.scale(scale, scale);
         ctx.drawImage(currentMapImage, 0, 0, currentMapImage.width, currentMapImage.height);
-        
+
         currentRooms.forEach(room => {
             ctx.save();
-            
+
             const hasPair = hasClassNow(room.name);
-            
+
             if (hasPair) {
                 ctx.fillStyle = 'rgba(128, 128, 128, 0.6)';
             } else {
                 ctx.fillStyle = 'rgba(76, 175, 80, 0.6)';
             }
-            
+
             ctx.fill(room.path);
             ctx.lineWidth = 2 / scale;
             ctx.stroke(room.path);
-            
+
             const centerX = room.x + room.width / 2;
             const centerY = room.y + room.height / 2;
             let fontSize = 18 * scale;
             fontSize = Math.min(20, Math.max(12, fontSize));
-            
+
             ctx.save();
             ctx.translate(centerX, centerY);
             if (room.width <= 40) {
                 ctx.rotate(-Math.PI / 2);
             }
-            
+
             ctx.font = `${fontSize}px "Martian Mono", "Inter", monospace`;
             ctx.fillStyle = '#000000';
             ctx.textAlign = 'center';
@@ -272,11 +326,11 @@ window.onload = function () {
             ctx.fillText(room.name, 0, 0);
             ctx.shadowBlur = 0;
             ctx.fillText(room.name, 0, 0);
-            
+
             ctx.restore();
             ctx.restore();
         });
-        
+
         ctx.restore();
     }
 
@@ -284,7 +338,7 @@ window.onload = function () {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        
+
         let clientX, clientY;
         if (e.touches) {
             clientX = e.touches[0].clientX;
@@ -293,18 +347,18 @@ window.onload = function () {
             clientX = e.clientX;
             clientY = e.clientY;
         }
-        
+
         let canvasX = (clientX - rect.left) * scaleX;
         let canvasY = (clientY - rect.top) * scaleY;
         canvasX = (canvasX - offsetX) / scale;
         canvasY = (canvasY - offsetY) / scale;
-        
+
         return { x: canvasX, y: canvasY };
     }
 
     function checkRoomClick(e) {
         const coords = getCanvasCoords(e);
-        
+
         for (let i = currentRooms.length - 1; i >= 0; i--) {
             const room = currentRooms[i];
             if (ctx.isPointInPath(room.path, coords.x, coords.y)) {
@@ -325,7 +379,7 @@ window.onload = function () {
         canvas.style.cursor = 'grabbing';
         e.preventDefault();
     });
-    
+
     canvas.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const dx = e.clientX - dragStartX;
@@ -335,7 +389,7 @@ window.onload = function () {
         clampOffset();
         draw();
     });
-    
+
     canvas.addEventListener('mouseup', (e) => {
         if (isDragging) {
             const dx = e.clientX - dragStartX;
@@ -347,12 +401,12 @@ window.onload = function () {
         isDragging = false;
         canvas.style.cursor = 'grab';
     });
-    
+
     canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const newScale = scale * delta;
-        
+
         if (newScale > 0.3 && newScale < 5) {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
@@ -372,12 +426,12 @@ window.onload = function () {
             draw();
         }
     });
-    
+
     // Touch events
     let touchStartX = 0, touchStartY = 0;
     let touchLastX = 0, touchLastY = 0;
     let isTouching = false;
-    
+
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         isTouching = true;
@@ -386,7 +440,7 @@ window.onload = function () {
         touchLastX = offsetX;
         touchLastY = offsetY;
     });
-    
+
     canvas.addEventListener('touchmove', (e) => {
         if (!isTouching) return;
         e.preventDefault();
@@ -397,11 +451,11 @@ window.onload = function () {
         clampOffset();
         draw();
     });
-    
+
     canvas.addEventListener('touchend', (e) => {
         isTouching = false;
     });
-    
+
     // Переключение этажа
     function switchFloor(floor) {
         if (floor === currentFloor) return;
@@ -411,7 +465,7 @@ window.onload = function () {
         offsetY = 0;
         loadFloor(floor);
     }
-    
+
     // Добавляем обработчики на кнопки этажей
     document.querySelectorAll('.floor-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -419,7 +473,7 @@ window.onload = function () {
             switchFloor(floor);
         });
     });
-    
+
     // Инициализация
     canvas.style.cursor = 'grab';
     loadFloor(6); // Загружаем 6 этаж по умолчанию
