@@ -1,0 +1,33 @@
+# === Сборка и временные файлы (.NET) ===
+[Bb]in/
+[Oo]bj/
+out/
+publish/
+
+# === Специфично для Rider (JetBrains) ===
+.idea/
+*.sln.iml
+*.user
+
+# === Специфично для Visual Studio ===
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# === Файлы NuGet ===
+project.lock.json
+project.assets.json
+*.nupkg
+# Не игнорируй файлы конфигурации NuGet, если они есть
+!nuget.config
+
+# === Файлы операционной системы ===
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# === Прочее ===
+*.log
+*.tmp
