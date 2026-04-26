@@ -116,39 +116,30 @@
         </div>
     </div>
 
-    <div id="scheduleModal" class="modal schedule-modal">
-        <div class="modal-content schedule-content">
-            <span class="close-schedule">&times;</span>
-            <h2 id="scheduleRoomTitle">Расписание кабинета</h2>
-            <div class="schedule-week-switcher">
-                <button class="week-btn active" data-week-offset="0">Текущая неделя</button>
-                <button class="week-btn" data-week-offset="1">Следующая неделя</button>
-            </div>
-            <div class="schedule-table-container">
-                <table class="schedule-table" id="scheduleTable">
-                    <thead>
-                        <tr>
-                            <th>Пара</th>
-                            <th>Время</th>
-                            <th>ПН</th>
-                            <th>ВТ</th>
-                            <th>СР</th>
-                            <th>ЧТ</th>
-                            <th>ПТ</th>
-                            <th>СБ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scheduleTableBody">
-                        <!-- Данные будут загружены динамически -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="schedule-note">
-                <span class="busy-cell">📖</span> - Занято (есть пара)
-                <span class="free-cell">✅</span> - Свободно
-            </div>
+    <!-- Модальное окно с расписанием на текущий день -->
+<div id="scheduleModal" class="modal schedule-modal">
+    <div class="modal-content schedule-content">
+        <span class="close-schedule">&times;</span>
+        <h2 id="scheduleRoomTitle">Расписание кабинета</h2>
+        <div id="scheduleDate" class="schedule-date"></div>
+        <div class="schedule-table-container">
+            <table class="schedule-table" id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th>Пара</th>
+                        <th>Время</th>
+                        <th>Предмет</th>
+                        <th>Преподаватель</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                    <!-- Данные будут загружены динамически -->
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
     <script src="map.js" defer></script>
     <script src="time.js" defer></script>

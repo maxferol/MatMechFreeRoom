@@ -17,22 +17,16 @@ body {
     z-index: 200;
 }
 
-/* Добавьте отступ сверху для обертки контролов */
 .controls-wrapper {
-    position: fixed;
-    top: 120px;  /* Было 20px, увеличьте это значение */
-    left: 0;
-    right: 0;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    z-index: 150;
-    padding: 12px 20px;
+    padding: 20px 20px 0 20px;
     background: transparent;
-    pointer-events: none;
+    margin-top: 1vh;
 }
 
 .menuTime {
@@ -61,16 +55,16 @@ button:active {
 .map {
     display: flex;
     justify-content: center;
+    flex-direction: column;
     width: 100%;
 }
 
 .map-canvas {
     padding: 20px;
+    margin-top: 5vh;
 }
 
-.container {
-    margin-top: 140px;
-}
+
 
 
 
@@ -458,6 +452,164 @@ button:active {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+/* Модальное окно расписания - увеличенный размер */
+.schedule-modal .modal-content {
+    max-width: 900px;
+    width: 90%;
+    min-width: 320px;
+}
+
+.schedule-content {
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 30px 25px;
+}
+
+.schedule-content h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    text-align: center;
+}
+
+.schedule-date {
+    text-align: center;
+    font-size: 23px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 25px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 12px;
+}
+
+.viewScheduleBtn{
+    display: flex;
+    justify-content: center;
+}
+
+.schedule-table-container {
+    overflow-x: auto;
+    margin: 0 -5px;
+    padding: 0 5px;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    min-width: 500px;
+}
+
+.schedule-table th,
+.schedule-table td {
+    border: 1px solid #ddd;
+    padding: 14px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.schedule-table th {
+    background: #f5f5f5;
+    font-weight: 700;
+    font-size: 15px;
+    position: sticky;
+    top: 0;
+}
+
+.schedule-table td.busy {
+    background: rgba(128, 128, 128, 0.1);
+}
+
+.schedule-table td.free {
+    background: rgba(76, 175, 80, 0.08);
+}
+
+.pair-number {
+    font-weight: 700;
+    text-align: center;
+    width: 70px;
+    font-size: 16px;
+}
+
+.pair-time {
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+    width: 110px;
+}
+
+.subject-name {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.teacher-name {
+    color: #555;
+    font-size: 14px;
+}
+
+/* Увеличенное модальное окно комнаты */
+#myModalRoom .modal-content {
+    position: fixed;
+    width: 400px;
+    min-height: 420px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    padding: 30px 25px;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    box-shadow: none;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.status-busy {
+    background: rgba(128, 128, 128, 0.2);
+    color: #555;
+}
+
+.status-free {
+    background: rgba(76, 175, 175, 0.2);
+    color: #2e7d32;
+}
+
+/* Кнопка закрытия - скрыта */
+.close-schedule {
+    display: none;
+}
+
+
+
+/* Адаптив */
+@media (max-width: 600px) {
+    .schedule-table th,
+    .schedule-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+    
+    .schedule-content h2 {
+        font-size: 18px;
     }
 }
 
