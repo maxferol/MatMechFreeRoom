@@ -52,33 +52,33 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     //     }
     // }
 
-    public async Task<RoomDynamic> CreateRoomDynamic(RoomDynamic material)
+    public async Task<RoomDynamic> CreateRoomDynamic(RoomDynamic roomDynamic)
     {
         try
         {
-            if (material == null)
-                throw new ArgumentNullException(nameof(material), "RoomDynamic не должен быть null");
+            if (roomDynamic == null)
+                throw new ArgumentNullException(nameof(roomDynamic), "RoomDynamic не должен быть null");
             
             var bsonDocument = new BsonDocument
             {
-                { "materialId", material.Id.Value.ToString() },
-                { "subjectId", material.SubjectId.Value.ToString() },
-                { "userId", material.UserId.Value.ToString() },
-                { "name", material.Name.Value },
-                { "year", material.Year.Value },
-                { "semester", material.Semester.Value },
-                { "description", material.Description },
-                { "size", material.Size.Size },
-                { "materialType", material.MaterialType.ToString() },
-                { "filePath", material.FilePath.Value },
-                { "uploadedAt", material.UploadedAt },
-                { "viewCount", material.ViewCount },
-                { "downloadCount", material.DownloadCount }
+                { "roomDynamicId", roomDynamic.Id.Value.ToString() },
+                { "subjectId", roomDynamic.SubjectId.Value.ToString() },
+                { "userId", roomDynamic.UserId.Value.ToString() },
+                { "name", roomDynamic.Name.Value },
+                { "year", roomDynamic.Year.Value },
+                { "semester", roomDynamic.Semester.Value },
+                { "description", roomDynamic.Description },
+                { "size", roomDynamic.Size.Size },
+                { "roomDynamicType", roomDynamic.roomDynamicType.ToString() },
+                { "filePath", roomDynamic.FilePath.Value },
+                { "uploadedAt", roomDynamic.UploadedAt },
+                { "viewCount", roomDynamic.ViewCount },
+                { "downloadCount", roomDynamic.DownloadCount }
             };
             
             await CollectionRoomDynamic.InsertOneAsync(bsonDocument);
-            Console.WriteLine($"Материал сохранен в MongoDB!");
-            return material;
+            Console.WriteLine($"Аудитория сохранена в MongoDB!");
+            return roomDynamic;
         }
         catch (Exception ex)
         {
@@ -92,19 +92,15 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     {
         try
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("materialId", id.ToString());
+            var filter = Builders<BsonDocument>.Filter.Eq("roomDynamicId", id.ToString());
             var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
-
             if (document == null)
-            {
                 return null;
-            }
-
             return MapToRoomDynamic(document);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Ошибка при получении материала: {ex.Message}", ex);
+            throw new Exception($"Ошибка при получении аудитории: {ex.Message}", ex);
         }
     }
     
@@ -114,17 +110,13 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         {
             var filter = Builders<BsonDocument>.Filter.Eq("name", RoomDynamicName);
             var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
-
             if (document == null)
-            {
                 return null;
-            }
-
             return MapToRoomDynamic(document);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Ошибка при получении материала: {ex.Message}", ex);
+            throw new Exception($"Ошибка при получении аудитории: {ex.Message}", ex);
         }
     }
 
@@ -143,7 +135,7 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
     }
 
-    public async Task<RoomDynamic?> UpdateRoomDynamic(RoomDynamic material)
+    public async Task<RoomDynamic?> UpdateRoomDynamic(RoomDynamic roomDynamic)
     {
         try
         {
@@ -151,7 +143,7 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
         catch (Exception ex)
         {
-            throw new Exception($"Ошибка при получении материалов по предмету: {ex.Message}", ex);
+            throw new Exception($"Ошибка при получении аудитории: {ex.Message}", ex);
         }
     }
 
@@ -208,7 +200,7 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         return result;
     }
 
-    public Task<RoomDynamic> Create(RoomDynamic material)
+    public Task<RoomDynamic> Create(RoomDynamic roomDynamic)
     {
         throw new NotImplementedException();
     }
@@ -217,7 +209,7 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     {
         try
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("materialId", id.ToString());
+            var filter = Builders<BsonDocument>.Filter.Eq("roomDynamicId", id.ToString());
             var result = await CollectionRoomDynamic.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
         }
@@ -229,39 +221,39 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
 
     private static RoomDynamic MapToRoomDynamic(BsonDocument document)
     {
-        var name = new MaterialName(document["name"].AsString);
+        var name = new roomDynamicName(document["name"].AsString);
         var subjectId = new SubjectId(Guid.Parse(document["subjectId"].AsString));
         var userId = new UserId(Guid.Parse(document["userId"].AsString));
         var year = new StudyYear(document["year"].AsInt32);
-        var size = new MaterialSize(document["size"].AsInt64);
-        var materialType = Enum.Parse<MaterialType>(document["materialType"].AsString, ignoreCase: true);
+        var size = new roomDynamicSize(document["size"].AsInt64);
+        var roomDynamicType = Enum.Parse<roomDynamicType>(document["roomDynamicType"].AsString, ignoreCase: true);
         var filePath = new ResourceLocation(document["filePath"].AsString);
         var filePathIcon = new ResourceLocation(document["filePathIcon"].AsString);
         
         var semester = new Semester(document.Contains("semester") ? document["semester"].AsInt32 : 1);
         var description = document.Contains("description") ? document["description"].AsString : string.Empty;
 
-        var material = new RoomDynamic(name, subjectId, userId, year, semester, description, size, materialType, filePath, filePathIcon);
+        var roomDynamic = new RoomDynamic(name, subjectId, userId, year, semester, description, size, roomDynamicType, filePath, filePathIcon);
         
         var idProperty = typeof(RoomDynamic).GetProperty("Id");
         var uploadedAtProperty = typeof(RoomDynamic).GetProperty("UploadedAt");
         
-        idProperty?.SetValue(material, new RoomDynamicId(Guid.Parse(document["materialId"].AsString)));
-        uploadedAtProperty?.SetValue(material, document["uploadedAt"].ToUniversalTime());
+        idProperty?.SetValue(roomDynamic, new RoomDynamicId(Guid.Parse(document["roomDynamicId"].AsString)));
+        uploadedAtProperty?.SetValue(roomDynamic, document["uploadedAt"].ToUniversalTime());
         
         var viewCountProperty = typeof(RoomDynamic).GetProperty("ViewCount");
         var downloadCountProperty = typeof(RoomDynamic).GetProperty("DownloadCount");
-        viewCountProperty?.SetValue(material, document.Contains("viewCount") ? document["viewCount"].AsInt32 : 0);
-        downloadCountProperty?.SetValue(material, document.Contains("downloadCount") ? document["downloadCount"].AsInt32 : 0);
+        viewCountProperty?.SetValue(roomDynamic, document.Contains("viewCount") ? document["viewCount"].AsInt32 : 0);
+        downloadCountProperty?.SetValue(roomDynamic, document.Contains("downloadCount") ? document["downloadCount"].AsInt32 : 0);
 
-        return material;
+        return roomDynamic;
     }
 
     public async Task<bool> IncrementViewCountAsync(Guid id)
     {
         try
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("materialId", id.ToString());
+            var filter = Builders<BsonDocument>.Filter.Eq("roomDynamicId", id.ToString());
             var update = Builders<BsonDocument>.Update.Inc("viewCount", 1);
             var result = await CollectionRoomDynamic.UpdateOneAsync(filter, update);
             return result.ModifiedCount > 0;
@@ -277,7 +269,7 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     {
         try
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("materialId", id.ToString());
+            var filter = Builders<BsonDocument>.Filter.Eq("roomDynamicId", id.ToString());
             var update = Builders<BsonDocument>.Update.Inc("downloadCount", 1);
             var result = await CollectionRoomDynamic.UpdateOneAsync(filter, update);
             return result.ModifiedCount > 0;
