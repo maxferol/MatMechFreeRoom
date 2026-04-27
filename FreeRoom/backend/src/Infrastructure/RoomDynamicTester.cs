@@ -16,6 +16,50 @@ public class RoomDynamicTester
         _repository = new RoomDynamicMongoDB(connectionString, dbName);
     }
 
+    public async Task CreateRooms()
+    {
+        Console.WriteLine("\n>>> НАЧАЛО ДОБАВЛЕНИЙ АУДИТОРИЙ <<<");
+
+        try
+        {
+            
+            // 1. ПОДГОТОВКА ДАННЫХ
+            var staticId = new RoomStaticId("621");
+            var userId = new UserId(Guid.NewGuid());
+            var lesson = new LessonNumber(3);
+            var date = new BookingDate(DateTime.UtcNow.AddDays(2));
+
+            // Используем рефлексию для создания объекта, так как конструктор приватный
+            var testBooking = (RoomDynamic)Activator.CreateInstance(
+                typeof(RoomDynamic),
+                BindingFlags.NonPublic | BindingFlags.Instance,
+                null,
+                new object[] { staticId, userId, lesson, date },
+                null)!;
+
+            // Устанавливаем Id
+            var bookingId = Guid.NewGuid();
+            typeof(RoomDynamic).GetProperty("Id")?.SetValue(testBooking, new RoomDynamicId(bookingId));
+
+            // 2. ТЕСТ: CreateRoomDynamic
+            Console.WriteLine("[TEST 1]: Создание бронирования...");
+            await _repository.CreateRoomDynamic(testBooking);
+            Console.WriteLine("✓ Успешно сохранено.");
+
+            // 4. ТЕСТ: GetAll
+            Console.WriteLine("[TEST 3]: Получение всех записей...");
+            var all = await _repository.GetAll();
+            Console.WriteLine($"✓ В базе найдено записей: {all.Count}");
+            if (all.Count == 0) throw new Exception("Ошибка: Список пуст.");
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"\nОШИБКА ТЕСТЕРА: {ex.Message}");
+            Console.ResetColor();
+        }
+    }
+
     public async Task RunTest()
     {
         Console.WriteLine("\n>>> НАЧАЛО ТЕСТИРОВАНИЯ RoomDynamicMongoDB <<<");
@@ -23,7 +67,7 @@ public class RoomDynamicTester
         try
         {
             // 1. ПОДГОТОВКА ДАННЫХ
-            var staticId = new RoomStaticId(Guid.NewGuid());
+            var staticId = new RoomStaticId("621");
             var userId = new UserId(Guid.NewGuid());
             var lesson = new LessonNumber(3);
             var date = new BookingDate(DateTime.UtcNow.AddDays(2));

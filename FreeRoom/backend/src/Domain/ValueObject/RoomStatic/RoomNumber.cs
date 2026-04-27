@@ -4,7 +4,6 @@ public class RoomNumber
 {
     readonly static int MinRoomNumber = 100; //потом поменяем
     readonly static int MaxRoomNumber = 300; //потом поменяем
-    
     private static bool[] UsedRoomNumbers = new bool[MaxRoomNumber + 1];
     
     public int Value { get; }

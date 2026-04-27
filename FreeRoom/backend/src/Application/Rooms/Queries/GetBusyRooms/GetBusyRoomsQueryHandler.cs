@@ -24,7 +24,7 @@ public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, List<
                         b.LessonNumber.Value == request.PairNumber)
             .Select(b => new BusyRoomDto(
                 // Используем переопределенный ToString(), чтобы получить Guid строкой
-                RoomNumber: b.RoomStaticId.ToString(), 
+                RoomNumber: b.RoomStaticId.Value, 
                 LessonNumber: b.LessonNumber.Value,
                 BookingDate: b.BookingDate.Value
             ))

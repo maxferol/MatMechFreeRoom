@@ -1,19 +1,17 @@
-﻿namespace FreeRoom.backend.src.Infrastructure.GetEntitiesId;
+﻿namespace FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
 
-public class RoomStaticId
+public class LessonNumber
 {
-    public Guid Value { get; }
+    readonly static int MinLessonNumber = 1;
+    readonly static int MaxLessonNumber = 10;
+    public int Value { get; }
+    
+    //private LessonNumber() { }
 
-    public RoomStaticId(Guid value)
+    public LessonNumber(int value)
     {
-        // Можно добавить проверку на пустой Guid, если нужно
-        if (value == Guid.Empty)
-            throw new ArgumentException("Guid не может быть пустым", nameof(value));
-            
+        if (value < MinLessonNumber || value > MaxLessonNumber)
+            throw new ArgumentOutOfRangeException($"Номер пары не попадает в заданный диапазон: [{MinLessonNumber},{MaxLessonNumber}]",nameof(value));
         Value = value;
     }
-
-    public static RoomStaticId New() => new RoomStaticId(Guid.NewGuid());
-
-    public override string ToString() => Value.ToString();
 }
