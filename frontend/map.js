@@ -18,6 +18,9 @@ window.onload = function () {
     let isDataLoaded = false;
     let currentFloor = 6; // Текущий этаж (6 или 5)
     let currentRooms = []; // Текущий массив комнат
+    
+    // НОВАЯ ПЕРЕМЕННАЯ: Кэш статусов комнат для текущей пары
+    let roomHasClassCache = new Map(); // key: roomName, value: boolean
 
     // Добавьте в начало map.js, после объявления переменных
     window.roomsStatus = roomsStatus;
@@ -63,14 +66,53 @@ window.onload = function () {
 
         // Обновляем глобальную переменную
         window.roomsStatus = roomsStatus;
+        
+        // ОБНОВЛЯЕМ КЭШ после изменения статусов
+        updateRoomHasClassCache();
     };
+    
+    // НОВАЯ ФУНКЦИЯ: Обновление кэша статусов комнат
+    function updateRoomHasClassCache() {
+        roomHasClassCache.clear();
+        
+        if (!currentPair) {
+            // Если нет текущей пары, все комнаты свободны
+            currentRooms.forEach(room => {
+                roomHasClassCache.set(room.name, false);
+            });
+            return;
+        }
+        
+        currentRooms.forEach(room => {
+            const roomStatus = roomsStatus[room.name];
+            const hasClass = roomStatus ? roomStatus.includes(currentPair) : false;
+            roomHasClassCache.set(room.name, hasClass);
+        });
+    }
+    
+    // НОВАЯ ФУНКЦИЯ: Обновление кэша при смене этажа
+    function updateRoomHasClassCacheForCurrentFloor() {
+        if (!isDataLoaded) return;
+        
+        roomHasClassCache.clear();
+        
+        if (!currentPair) {
+            currentRooms.forEach(room => {
+                roomHasClassCache.set(room.name, false);
+            });
+            return;
+        }
+        
+        currentRooms.forEach(room => {
+            const roomStatus = roomsStatus[room.name];
+            const hasClass = roomStatus ? roomStatus.includes(currentPair) : false;
+            roomHasClassCache.set(room.name, hasClass);
+        });
+    }
 
-    // Обновляем функцию hasClassNow, чтобы использовала roomsStatus
+    // Оптимизированная функция проверки, есть ли пара в комнате (использует кэш)
     function hasClassNow(roomName) {
-        if (!currentPair) return false;
-        const roomStatus = roomsStatus[roomName];
-        if (!roomStatus) return false;
-        return roomStatus.includes(currentPair);
+        return roomHasClassCache.get(roomName) || false;
     }
 
     const rooms_6 = [
@@ -162,6 +204,8 @@ window.onload = function () {
             resizeCanvas();
             isLoading = false;
             if (isDataLoaded) {
+                // Обновляем кэш для нового этажа
+                updateRoomHasClassCacheForCurrentFloor();
                 draw();
             }
         };
@@ -209,24 +253,21 @@ window.onload = function () {
         }
     }
 
-    // Функция проверки, есть ли пара в комнате
-    function hasClassNow(roomName) {
-        if (!currentPair) return false;
-        const roomStatus = roomsStatus[roomName];
-        if (!roomStatus) return false;
-        return roomStatus.includes(currentPair);
-    }
-
     // Инициализация данных
     async function initData() {
         roomsStatus = await loadRoomsStatus();
         currentPair = getCurrentPair();
         isDataLoaded = true;
+        
+        // Инициализируем кэш после загрузки статусов
+        updateRoomHasClassCacheForCurrentFloor();
 
         setInterval(() => {
             const newPair = getCurrentPair();
             if (newPair !== currentPair) {
                 currentPair = newPair;
+                // Обновляем кэш при смене пары
+                updateRoomHasClassCacheForCurrentFloor();
                 draw();
             }
         }, 60000);
@@ -281,6 +322,7 @@ window.onload = function () {
         draw();
     });
 
+    // ОПТИМИЗИРОВАННАЯ ФУНКЦИЯ DRAW (использует кэш)
     function draw() {
         if (!ctx || !currentMapImage.complete) return;
         if (!isDataLoaded) return;
@@ -294,7 +336,8 @@ window.onload = function () {
         currentRooms.forEach(room => {
             ctx.save();
 
-            const hasPair = hasClassNow(room.name);
+            // Используем кэшированное значение вместо вызова hasClassNow
+            const hasPair = roomHasClassCache.get(room.name) || false;
 
             if (hasPair) {
                 ctx.fillStyle = 'rgba(128, 128, 128, 0.6)';

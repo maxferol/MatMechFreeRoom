@@ -6,20 +6,29 @@ headers = {
 }
 
 params = {
-    'date_gte': '2026-04-21',
-    'date_lte': '2026-04-21'
+    'date_gte': '2026-04-27',
+    'date_lte': '2026-04-27'
 }
 
 response = requests.get('https://urfu.ru/api/v2/schedule/groups?search=МЕН', headers=headers, timeout=10)
 data = response.json()
 
-print(response.status_code)
+#print(response.status_code)
 
 needed_keys = ['date', 'pairNumber', 'auditoryTitle', 'auditoryLocation']
 
 
 def check_address_and_auditory(subject):
-    if (subject['auditoryLocation'] is not None and 'Тургенева, 4' in subject['auditoryLocation'] and subject['auditoryTitle'][0] == '6'):
+    # Проверяем, что auditoryTitle существует и не None
+    auditory_title = subject.get('auditoryTitle')
+    if auditory_title is None or len(auditory_title) == 0:
+        return False
+    
+    # Проверяем location
+    auditory_location = subject.get('auditoryLocation')
+    
+    if (auditory_location is not None and 'Тургенева, 4' in auditory_location 
+        and (auditory_title[0] == '6' or auditory_title[0] == '5')):
         return True
     return False
 
@@ -57,6 +66,7 @@ for group in data:
     filtered_list = filter_events(group_data['events'])
 
     print(filtered_list)
+    print(group_data.get)
     add_room_takings(filtered_list)
 
 print(room_taken_pairs)
