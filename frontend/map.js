@@ -23,11 +23,9 @@ window.onload = function () {
     window.roomsStatus = roomsStatus;
     window.currentPair = currentPair;
 
-    // Функция для получения занятых комнат (нужно реализовать запрос к бэкенду)
     window.fetchBusyRooms = async function (date, pairNumber) {
         try {
-            // TODO: заменить на реальный запрос к бэкенду
-            const response = await fetch(`/api/rooms/busy?date=${date}&pair=${pairNumber}`);
+            const response = await fetch(`http://localhost:5000/api/rooms/busy?date=${date}&pair=${pairNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -35,11 +33,9 @@ window.onload = function () {
 
             const data = await response.json();
 
-            // Ожидаем массив строк с названиями занятых комнат
-            if (data.busyRooms) {
+            // В ответе приходит: { success: true, date: "...", pair: 1, busyRooms: ["612", "625", ...] }
+            if (data.busyRooms && Array.isArray(data.busyRooms)) {
                 return data.busyRooms;
-            } else if (Array.isArray(data)) {
-                return data;
             }
             return [];
 
@@ -49,6 +45,9 @@ window.onload = function () {
         }
     };
 
+    // Пример использования:
+    // const busyRooms = await window.fetchBusyRooms('2024-01-15', 3);
+    // console.log('Занятые комнаты:', busyRooms);
     // Функция обновления статусов комнат
     window.updateRoomsStatus = function (busyRooms, pair) {
         // Очищаем старые статусы
