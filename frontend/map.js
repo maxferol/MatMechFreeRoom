@@ -37,7 +37,7 @@ window.onload = function () {
     // Функция запроса к бэкенду
     window.fetchBusyRooms = async function (date, pairNumber) {
         try {
-            const response = await fetch(`http://localhost:5000/api/rooms/busy?date=${date}&pair=${pairNumber}`);
+            const response = await fetch(`http://localhost:8080/api/rooms/busy?date=${date}&pair=${pairNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
