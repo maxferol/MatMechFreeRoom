@@ -6,7 +6,6 @@ using MongoDB.Bson.Serialization;
 using FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
 using FreeRoom.backend.src.Infrastructure.GetEntitiesId;
 using FreeRoom.backend.src.Domain.Value_Object.RoomStatic;
-using FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
 
 namespace FreeRoom.backend.src.Infrastructure.RoomStorage;
 
@@ -216,7 +215,7 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     private static RoomDynamic MapToRoomDynamic(BsonDocument document)
     {
         // 1. Создаем необходимые Value Objects из документа
-        var roomStaticId = new RoomStaticId(Guid.Parse(document["roomStaticId"].AsString));
+        var roomStaticId = new RoomStaticId(document["roomStaticId"].AsString);
         var userId = new UserId(Guid.Parse(document["userId"].AsString));
         var lessonNumber = new LessonNumber(document["lessonNumber"].AsInt32);
         var bookingDate = new BookingDate(document["bookingDate"].ToUniversalTime());
