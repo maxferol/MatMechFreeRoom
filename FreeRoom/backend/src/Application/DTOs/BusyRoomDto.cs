@@ -1,6 +1,7 @@
-﻿namespace DefaultNamespace;
+﻿namespace FreeRoom.backend.src.Application.DTOs;
 
-public class BusyRoomDto
-{
-    
-}
+public record BusyRoomDto(
+    int RoomNumber,
+    int LessonNumber,
+    DateTime BookingDate
+);
