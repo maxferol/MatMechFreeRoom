@@ -13,104 +13,109 @@ window.onload = function () {
     let lastY = 0;
 
     // Глобальные переменные для статусов
-    let roomsStatus = {};
-    let currentPair = null;
+    let roomsStatus = {}; // Загружается из rooms.json один раз
+    let currentPair = null; // Текущая пара по времени (для автоматического обновления)
+    let selectedPair = null; // ВЫБРАННАЯ пользователем пара (из timeSwitcher)
     let isDataLoaded = false;
-    let currentFloor = 6; // Текущий этаж (6 или 5)
-    let currentRooms = []; // Текущий массив комнат
+    let currentFloor = 6;
+    let currentRooms = [];
     
-    // НОВАЯ ПЕРЕМЕННАЯ: Кэш статусов комнат для текущей пары
-    let roomHasClassCache = new Map(); // key: roomName, value: boolean
+    // Кэш статусов комнат для текущей выбранной пары
+    let roomHasClassCache = new Map();
 
-    // Добавьте в начало map.js, после объявления переменных
     window.roomsStatus = roomsStatus;
     window.currentPair = currentPair;
+    window.selectedPair = selectedPair;
 
-    // Функция для получения занятых комнат (нужно реализовать запрос к бэкенду)
+    // Функция для получения занятых комнат (только при смене даты)
     window.fetchBusyRooms = async function (date, pairNumber) {
-        try {
-            // TODO: заменить на реальный запрос к бэкенду
-            const response = await fetch(`/api/rooms/busy?date=${date}&pair=${pairNumber}`);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            // Ожидаем массив строк с названиями занятых комнат
-            if (data.busyRooms) {
-                return data.busyRooms;
-            } else if (Array.isArray(data)) {
-                return data;
-            }
-            return [];
-
-        } catch (error) {
-            console.error('Ошибка получения занятых комнат:', error);
+        if (!roomsStatus || Object.keys(roomsStatus).length === 0) {
+            console.warn('roomsStatus ещё не загружен');
             return [];
         }
+        
+        // Находим комнаты, у которых в массиве пар есть указанная пара
+        const busyRooms = [];
+        for (const [roomName, pairs] of Object.entries(roomsStatus)) {
+            if (pairs.includes(pairNumber)) {
+                busyRooms.push(roomName);
+            }
+        }
+        
+        console.log(`Занятые комнаты для пары ${pairNumber}:`, busyRooms);
+        return busyRooms;
     };
 
     // Функция обновления статусов комнат
     window.updateRoomsStatus = function (busyRooms, pair) {
-        // Очищаем старые статусы
         for (let key in roomsStatus) {
             delete roomsStatus[key];
         }
 
-        // Заполняем новыми
         busyRooms.forEach(roomName => {
             roomsStatus[roomName] = [pair];
         });
 
-        // Обновляем глобальную переменную
         window.roomsStatus = roomsStatus;
-        
-        // ОБНОВЛЯЕМ КЭШ после изменения статусов
         updateRoomHasClassCache();
     };
     
-    // НОВАЯ ФУНКЦИЯ: Обновление кэша статусов комнат
+    // ОСНОВНАЯ ФУНКЦИЯ: обновление кэша на основе ВЫБРАННОЙ пары
     function updateRoomHasClassCache() {
         roomHasClassCache.clear();
         
-        if (!currentPair) {
-            // Если нет текущей пары, все комнаты свободны
+        // Используем selectedPair (выбранную пользователем), если она есть
+        // Иначе используем currentPair (текущую по времени)
+        const activePair = (selectedPair !== null && selectedPair !== undefined) ? selectedPair : currentPair;
+        
+        if (!activePair) {
             currentRooms.forEach(room => {
                 roomHasClassCache.set(room.name, false);
             });
+            console.log('Кэш обновлен: нет активной пары, все комнаты свободны');
             return;
         }
         
+        console.log(`Обновление кэша для активной пары ${activePair} (selectedPair=${selectedPair}, currentPair=${currentPair})`);
+        
+        let occupiedCount = 0;
         currentRooms.forEach(room => {
             const roomStatus = roomsStatus[room.name];
-            const hasClass = roomStatus ? roomStatus.includes(currentPair) : false;
+            const hasClass = roomStatus ? roomStatus.includes(activePair) : false;
             roomHasClassCache.set(room.name, hasClass);
+            if (hasClass) {
+                occupiedCount++;
+                console.log(`  Комната ${room.name} ЗАНЯТА на паре ${activePair}`);
+            }
         });
+        
+        console.log(`Кэш обновлен: ${occupiedCount} из ${currentRooms.length} комнат занято`);
     }
     
-    // НОВАЯ ФУНКЦИЯ: Обновление кэша при смене этажа
+    // Обновление кэша для текущего этажа (использует activePair)
     function updateRoomHasClassCacheForCurrentFloor() {
-        if (!isDataLoaded) return;
-        
-        roomHasClassCache.clear();
-        
-        if (!currentPair) {
-            currentRooms.forEach(room => {
-                roomHasClassCache.set(room.name, false);
-            });
+        if (!isDataLoaded) {
+            console.warn('Данные еще не загружены');
             return;
         }
         
-        currentRooms.forEach(room => {
-            const roomStatus = roomsStatus[room.name];
-            const hasClass = roomStatus ? roomStatus.includes(currentPair) : false;
-            roomHasClassCache.set(room.name, hasClass);
-        });
+        updateRoomHasClassCache(); // Просто вызываем общую функцию
     }
 
-    // Оптимизированная функция проверки, есть ли пара в комнате (использует кэш)
+    // Функция для установки выбранной пары (вызывается из timeSwitcher)
+    window.setSelectedPair = function(pair) {
+        selectedPair = pair;
+        console.log(`Установлена выбранная пара: ${selectedPair}`);
+        updateRoomHasClassCache();
+        draw();
+    };
+    
+    // Функция для получения текущей активной пары
+    window.getActivePair = function() {
+        return (selectedPair !== null && selectedPair !== undefined) ? selectedPair : currentPair;
+    };
+
+    // Проверка, есть ли пара в комнате (использует кэш)
     function hasClassNow(roomName) {
         return roomHasClassCache.get(roomName) || false;
     }
@@ -153,13 +158,11 @@ window.onload = function () {
         { name: "540", x: 1218, y: 172, width: 70, height: 128, path: null },
         { name: "528", x: 895, y: 172, width: 28, height: 128, path: null },
         { name: "530", x: 923, y: 172, width: 28, height: 128, path: null },
-
         { name: "526", x: 805, y: 170, width: 87, height: 128, path: null },
         { name: "524", x: 775, y: 169, width: 29, height: 128, path: null },
         { name: "524a", x: 712, y: 195, width: 60, height: 105, path: null },
         { name: "522", x: 620, y: 170, width: 90, height: 130, path: null },
         { name: "514", x: 390, y: 170, width: 135, height: 130, path: null },
-
         { name: "501", x: 390, y: 19 - 15, width: 65, height: 125 + 5, path: null },
         { name: "505", x: 455, y: 19 - 15, width: 65, height: 130, path: null },
         { name: "507", x: 520, y: 19 - 15, width: 60 + 35, height: 130, path: null },
@@ -169,7 +172,6 @@ window.onload = function () {
         { name: "517", x: 1233, y: 19 - 15, width: 55, height: 100 + 5, path: null },
     ];
 
-    // Карты для разных этажей
     const floorMaps = {
         5: { image: './map5floor.svg', rooms: rooms_5 },
         6: { image: './map6floor.svg', rooms: rooms_6 }
@@ -178,7 +180,6 @@ window.onload = function () {
     let currentMapImage = new Image();
     let isLoading = false;
 
-    // Загрузка карты для указанного этажа
     function loadFloor(floor) {
         if (isLoading) return;
         isLoading = true;
@@ -189,7 +190,6 @@ window.onload = function () {
         currentFloor = floor;
         currentRooms = floorData.rooms;
 
-        // Обновляем активную кнопку
         document.querySelectorAll('.floor-btn').forEach(btn => {
             if (btn.dataset.floor == floor) {
                 btn.classList.add('active');
@@ -198,13 +198,11 @@ window.onload = function () {
             }
         });
 
-        // Загружаем новую карту
         currentMapImage.onload = function () {
-            updateRoomPaths(); // Обновляем пути для новых комнат
+            updateRoomPaths();
             resizeCanvas();
             isLoading = false;
             if (isDataLoaded) {
-                // Обновляем кэш для нового этажа
                 updateRoomHasClassCacheForCurrentFloor();
                 draw();
             }
@@ -217,7 +215,6 @@ window.onload = function () {
         };
     }
 
-    // Обновление путей для текущих комнат
     function updateRoomPaths() {
         currentRooms.forEach(room => {
             const path = new Path2D();
@@ -226,7 +223,7 @@ window.onload = function () {
         });
     }
 
-    // Функция получения текущей пары
+    // Функция получения текущей пары по времени
     function getCurrentPair() {
         const now = new Date();
         const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -241,11 +238,12 @@ window.onload = function () {
         return null;
     }
 
-    // Функция загрузки статусов комнат из JSON
+    // Загрузка rooms.json (один раз при старте)
     async function loadRoomsStatus() {
         try {
             const response = await fetch('../parsing/rooms.json');
             const data = await response.json();
+            console.log('rooms.json загружен:', data);
             return data;
         } catch (error) {
             console.error('Ошибка загрузки rooms.json:', error);
@@ -256,19 +254,34 @@ window.onload = function () {
     // Инициализация данных
     async function initData() {
         roomsStatus = await loadRoomsStatus();
+        console.log('roomsStatus после загрузки:', roomsStatus);
+        
+        window.roomsStatus = roomsStatus;
+        
         currentPair = getCurrentPair();
+        console.log('Текущая пара по времени:', currentPair);
+        
         isDataLoaded = true;
         
-        // Инициализируем кэш после загрузки статусов
-        updateRoomHasClassCacheForCurrentFloor();
+        // Инициализируем кэш
+        updateRoomHasClassCache();
 
+        // Проверяем смену пары каждую минуту (только если не выбрана ручная пара)
         setInterval(() => {
             const newPair = getCurrentPair();
             if (newPair !== currentPair) {
+                console.log(`Смена пары по времени: ${currentPair} -> ${newPair}`);
                 currentPair = newPair;
-                // Обновляем кэш при смене пары
-                updateRoomHasClassCacheForCurrentFloor();
-                draw();
+                window.currentPair = currentPair;
+                
+                // Обновляем кэш ТОЛЬКО если не выбрана ручная пара
+                if (selectedPair === null || selectedPair === undefined) {
+                    console.log('Автообновление кэша (нет выбранной пары)');
+                    updateRoomHasClassCache();
+                    draw();
+                } else {
+                    console.log(`Ручная пара ${selectedPair} активна, автообновление пропущено`);
+                }
             }
         }, 60000);
 
@@ -322,7 +335,6 @@ window.onload = function () {
         draw();
     });
 
-    // ОПТИМИЗИРОВАННАЯ ФУНКЦИЯ DRAW (использует кэш)
     function draw() {
         if (!ctx || !currentMapImage.complete) return;
         if (!isDataLoaded) return;
@@ -333,14 +345,16 @@ window.onload = function () {
         ctx.scale(scale, scale);
         ctx.drawImage(currentMapImage, 0, 0, currentMapImage.width, currentMapImage.height);
 
+        let occupiedRendered = 0;
+
         currentRooms.forEach(room => {
             ctx.save();
 
-            // Используем кэшированное значение вместо вызова hasClassNow
             const hasPair = roomHasClassCache.get(room.name) || false;
-
+            
             if (hasPair) {
                 ctx.fillStyle = 'rgba(128, 128, 128, 0.6)';
+                occupiedRendered++;
             } else {
                 ctx.fillStyle = 'rgba(76, 175, 80, 0.6)';
             }
@@ -412,7 +426,7 @@ window.onload = function () {
         return false;
     }
 
-    // Обработчики событий (те же)
+    // Обработчики событий
     canvas.addEventListener('mousedown', (e) => {
         isDragging = true;
         dragStartX = e.clientX;
@@ -499,17 +513,14 @@ window.onload = function () {
         isTouching = false;
     });
 
-    // Переключение этажа
     function switchFloor(floor) {
         if (floor === currentFloor) return;
-        // Сбрасываем масштаб и позицию при смене этажа
         scale = 1;
         offsetX = 0;
         offsetY = 0;
         loadFloor(floor);
     }
 
-    // Добавляем обработчики на кнопки этажей
     document.querySelectorAll('.floor-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const floor = parseInt(btn.dataset.floor);
@@ -517,8 +528,14 @@ window.onload = function () {
         });
     });
 
-    // Инициализация
     canvas.style.cursor = 'grab';
-    loadFloor(6); // Загружаем 6 этаж по умолчанию
+    loadFloor(6);
     initData();
+
+    // Экспортируем функции для timeSwitcher.js
+    window.updateRoomHasClassCacheForCurrentFloor = updateRoomHasClassCacheForCurrentFloor;
+    window.draw = draw;
+    window.roomsStatus = roomsStatus;
+    window.setSelectedPair = setSelectedPair;
+    window.getActivePair = getActivePair;
 };

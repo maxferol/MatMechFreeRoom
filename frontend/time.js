@@ -1,7 +1,7 @@
 // Общие данные о парах
 const PAIRS_DATA = [
     { number: 1, start: 9 * 60, end: 10 * 60 + 30, text: "9:00 - 10:30" },
-    { number: 2, start: 10 * 60 + 40, end: 12 * 60 + 10, text: "10:40 - 12:10" },
+    { number: 2, start: 10 * 60 + 30, end: 12 * 60 + 10, text: "10:40 - 12:10" },
     { number: 3, start: 12 * 60 + 50, end: 14 * 60 + 20, text: "12:50 - 14:20" },
     { number: 4, start: 14 * 60 + 30, end: 16 * 60, text: "14:30 - 16:00" },
     { number: 5, start: 16 * 60 + 10, end: 17 * 60 + 40, text: "16:10 - 17:40" },
