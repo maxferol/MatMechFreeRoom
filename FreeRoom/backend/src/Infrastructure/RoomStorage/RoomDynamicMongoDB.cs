@@ -60,6 +60,12 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         {
             if (roomDynamic == null)
                 throw new ArgumentNullException(nameof(roomDynamic), "RoomDynamic не должен быть null");
+            if (await GetByEqualsRoom(roomDynamic) != null)
+            {
+                Console.WriteLine("Такая аудитория уже есть!");
+                return null;
+            }
+
             var bsonDocument = new BsonDocument
             {
                 { "roomDynamicId", roomDynamic.Id.Value.ToString() },
@@ -81,11 +87,32 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
     }
 
-    public async Task<RoomDynamic?> GetByIdRoomDynamic(Guid id)
+    public async Task<RoomDynamic?> GetByRoomStaticId(string idRoomStatic)
     {
         try
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("roomDynamicId", id.ToString());
+            var filter = Builders<BsonDocument>.Filter.Eq("roomStaticId", idRoomStatic);
+            var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
+            if (document == null)
+                return null;
+            return MapToRoomDynamic(document);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Ошибка при получении аудитории: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<RoomDynamic?> GetByEqualsRoom(RoomDynamic roomDynamic)
+    {
+        try
+        {
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq("bookingDate", roomDynamic.BookingDate.Value),
+                filterBuilder.Eq("roomStaticId", roomDynamic.RoomStaticId.ToString())
+            );
+
             var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
             if (document == null)
                 return null;

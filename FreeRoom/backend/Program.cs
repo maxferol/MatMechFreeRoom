@@ -21,6 +21,7 @@ builder.Services.AddSingleton<IRoomDynamicRepository>(sp =>
 //     new UserMongoDB(connectionString, databaseName));
 
 // 3. Настройка CORS
+// 1. Сначала регистрация сервиса
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -33,13 +34,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 4. Настройка Middleware (ПОРЯДОК ВАЖЕН!)
-app.UseRouting(); // Сначала роутинг
+// 2. Сначала Routing
+app.UseRouting();
 
-// CORS должен быть строго ПОСЛЕ UseRouting и ПЕРЕД MapControllers
-app.UseCors("AllowAll"); 
+// 3. ЗАТЕМ Cors (Обязательно перед MapControllers)
+app.UseCors("AllowAll");
 
-app.UseAuthorization(); // Полезно добавить на будущее
 app.MapControllers();
 
 // 5. Заполнение данными
