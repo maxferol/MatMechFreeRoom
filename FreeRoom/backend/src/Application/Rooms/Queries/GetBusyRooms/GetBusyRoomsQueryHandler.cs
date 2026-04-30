@@ -17,7 +17,9 @@ public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, List<
     {
         var allBookings = await _roomDynamicRepository.GetAll();
 
-        return allBookings
+        var busyRoom = new BusyRoomDto("666", 2, DateTime.Now);
+
+        return new List<BusyRoomDto> {busyRoom};/*allBookings
             .Where(b => b.BookingDate.Value.Date == request.Date.Date && 
                         b.LessonNumber.Value == request.PairNumber)
             .Select(b => new BusyRoomDto(
@@ -25,6 +27,6 @@ public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, List<
                 LessonNumber: b.LessonNumber.Value,
                 BookingDate: b.BookingDate.Value
             ))
-            .ToList();
+            .ToList();*/
     }
 }
