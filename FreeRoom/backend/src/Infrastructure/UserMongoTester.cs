@@ -24,7 +24,8 @@ public class UserMongoTester
         try
         {
             // 1. Создание данных
-            var login = Login.CreateLogin("Иван", "Иванов", "ivan_test_" + Guid.NewGuid().ToString().Substring(0, 5));
+            // var login = Login.CreateLogin("Иван", "Иванов", "ivan_test_" + Guid.NewGuid().ToString().Substring(0, 5));
+            var login = Login.CreateLogin("Иван", "Иванов", "ivan_test_18956");
             var passwordHash = PasswordHash.CreateHash("super_secret_hash_123");
             var role = UserRole.User;
 
@@ -49,7 +50,7 @@ public class UserMongoTester
             Console.WriteLine("[TEST 2]: Поиск по логину...");
             var foundByLogin = await _repository.GetByLogin(login.LoginUser);
             if (foundByLogin != null)
-                Console.WriteLine($"✓ Найдено! Имя: {foundByLogin.Login.FirstName}");
+                Console.WriteLine($"✓ Найдено! Login: {foundByLogin.Login.LoginUser}");
             else
                 throw new Exception("Пользователь не найден по логину.");
 
