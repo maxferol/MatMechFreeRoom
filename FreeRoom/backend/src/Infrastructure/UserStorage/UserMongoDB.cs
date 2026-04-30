@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using MongoDB.Bson;
+using System.Reflection;
 using FreeRoom.backend.src.Domain.Enities;
 using FreeRoom.backend.src.Domain.Value_Object.User;
 using FreeRoom.backend.src.Domain.Enum;
@@ -23,10 +24,8 @@ public class UserMongoDB
     {
         try
         {
-            if (user == null) 
-                throw new ArgumentNullException(nameof(user), "User не должен быть null");
+            if (user == null) throw new ArgumentNullException(nameof(user));
 
-            // Проверяем, нет ли уже пользователя с таким логином
             if (await GetByLogin(user.Login.LoginUser) != null)
             {
                 Console.WriteLine("Пользователь с таким логином уже существует!");
@@ -39,12 +38,11 @@ public class UserMongoDB
                 { "firstName", user.Login.FirstName },
                 { "secondName", user.Login.SecondName },
                 { "loginUser", user.Login.LoginUser },
-                { "passwordHash", user.PasswordHash.Value }, // Предполагаем наличие свойства Value
+                { "passwordHash", user.PasswordHash.Value },
                 { "role", user.Role.ToString() }
             };
 
             await _collectionUsers.InsertOneAsync(bsonDocument);
-            Console.WriteLine($"Пользователь {user.Login.LoginUser} сохранен в MongoDB!");
             return user;
         }
         catch (Exception ex)
@@ -56,66 +54,55 @@ public class UserMongoDB
 
     public async Task<User?> GetByLogin(string login)
     {
-        try
-        {
-            var filter = Builders<BsonDocument>.Filter.Eq("loginUser", login);
-            var document = await _collectionUsers.Find(filter).FirstOrDefaultAsync();
-            
-            return document == null ? null : MapToUser(document);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Ошибка при поиске пользователя по логину: {ex.Message}", ex);
-        }
+        var filter = Builders<BsonDocument>.Filter.Eq("loginUser", login);
+        var document = await _collectionUsers.Find(filter).FirstOrDefaultAsync();
+        return document == null ? null : MapToUser(document);
     }
 
     public async Task<User?> GetById(Guid id)
     {
-        try
-        {
-            var filter = Builders<BsonDocument>.Filter.Eq("userId", id.ToString());
-            var document = await _collectionUsers.Find(filter).FirstOrDefaultAsync();
-            
-            return document == null ? null : MapToUser(document);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Ошибка при поиске пользователя по ID: {ex.Message}", ex);
-        }
+        var filter = Builders<BsonDocument>.Filter.Eq("userId", id.ToString());
+        var document = await _collectionUsers.Find(filter).FirstOrDefaultAsync();
+        return document == null ? null : MapToUser(document);
     }
 
     private static User MapToUser(BsonDocument document)
     {
-        // 1. Восстанавливаем Login через рефлексию (так как конструктор приватный)
-        var login = (Login)Activator.CreateInstance(
-            typeof(Login),
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
+        // 1. Восстанавливаем Login через GetConstructor (надежнее Activator)
+        var loginCtor = typeof(Login).GetConstructor(
+            BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new object[] { 
-                document["firstName"].AsString, 
-                document["secondName"].AsString, 
-                document["loginUser"].AsString 
-            },
-            null)!;
+            new[] { typeof(string), typeof(string), typeof(string) },
+            null);
+
+        var login = (Login)loginCtor!.Invoke(new object[] { 
+            document["firstName"].AsString, 
+            document["secondName"].AsString, 
+            document["loginUser"].AsString 
+        });
 
         // 2. Восстанавливаем PasswordHash и Role
-        var passwordHash = new PasswordHash(document["passwordHash"].AsString);
+        var passwordHash = PasswordHash.CreateHash(document["passwordHash"].AsString);
         var role = Enum.Parse<UserRole>(document["role"].AsString);
 
-        // 3. Создаем User через приватный конструктор
-        var user = (User)Activator.CreateInstance(
-            typeof(User),
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
+        // 3. Восстанавливаем User через GetConstructor
+        var userCtor = typeof(User).GetConstructor(
+            BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public,
             null,
-            new object[] { login, passwordHash, role },
-            null)!;
+            new[] { typeof(Login), typeof(PasswordHash), typeof(UserRole) },
+            null);
+
+        if (userCtor == null)
+            throw new Exception("Constructor for User not found via reflection!");
+
+        var user = (User)userCtor.Invoke(new object[] { login, passwordHash, role });
 
         // 4. Устанавливаем Id
         var idProperty = typeof(User).GetProperty("Id");
-        if (document.Contains("userId"))
+        if (document.Contains("userId") && idProperty != null)
         {
             var idValue = new UserId(Guid.Parse(document["userId"].AsString));
-            idProperty?.SetValue(user, idValue);
+            idProperty.SetValue(user, idValue);
         }
 
         return user;
