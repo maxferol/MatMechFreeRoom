@@ -43,11 +43,11 @@ app.UseCors("AllowAll");
 app.MapControllers();
 
 // 5. Заполнение данными
-// string rawJson = "{\"612\": [2, 3, 1, 7, 6], \"625\": [2, 3, 6, 4, 5], \"623\": [2, 1, 3, 4], \"632\": [3, 1, 2, 4, 7, 6, 5], \"621\": [1, 2, 5, 6, 3], \"622\": [3, 1, 2], \"628\": [3, 4, 5, 2], \"602\": [3, 2], \"608\": [3, 2, 6], \"622а\": [3, 2, 4], \"601\": [3, 2, 4], \"605\": [2, 3, 4, 6], \"611\": [4, 5, 3, 2, 1, 7, 6], \"614\": [3]}";
-// var tester = new RoomDynamicTester(connectionString, databaseName);
-// await tester.CreateRoomsFromJson(rawJson);
+string rawJson = "{\"612\": [2, 3, 1, 7, 6], \"625\": [2, 3, 6, 4, 5], \"623\": [2, 1, 3, 4], \"632\": [3, 1, 2, 4, 7, 6, 5], \"621\": [1, 2, 5, 6, 3], \"622\": [3, 1, 2], \"628\": [3, 4, 5, 2], \"602\": [3, 2], \"608\": [3, 2, 6], \"622а\": [3, 2, 4], \"601\": [3, 2, 4], \"605\": [2, 3, 4, 6], \"611\": [4, 5, 3, 2, 1, 7, 6], \"614\": [3]}";
+var tester = new RoomDynamicTester(connectionString, databaseName);
+await tester.CreateRoomsFromJson(rawJson);
 
-var tester = new UserMongoTester(connectionString, databaseName);
-await tester.RunUserTest();
+// var tester = new UserMongoTester(connectionString, databaseName);
+// await tester.RunUserTest();
 
 app.Run();

@@ -60,11 +60,11 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         {
             if (roomDynamic == null)
                 throw new ArgumentNullException(nameof(roomDynamic), "RoomDynamic не должен быть null");
-            if (await GetByEqualsRoom(roomDynamic) != null)
-            {
-                Console.WriteLine("Такая аудитория уже есть!");
-                return null;
-            }
+            // if (await GetByEqualsRoom(roomDynamic) != null)
+            // {
+            //     Console.WriteLine("Такая аудитория уже есть!");
+            //     return null;
+            // }
 
             var bsonDocument = new BsonDocument
             {
