@@ -1,10 +1,9 @@
 ﻿using MediatR;
-using FreeRoom.backend.src.Application.DTOs;
 using FreeRoom.backend.src.Domain.Interfaces;
 
 namespace FreeRoom.backend.src.Application.Rooms.Queries.GetBusyRooms;
 
-public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, List<BusyRoomDto>>
+public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, Dictionary<string, List<int>>>
 {
     private readonly IRoomDynamicRepository _roomDynamicRepository;
 
@@ -13,21 +12,22 @@ public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, List<
         _roomDynamicRepository = roomDynamicRepository;
     }
 
-    public async Task<List<BusyRoomDto>> Handle(GetBusyRoomsQuery request, CancellationToken cancellationToken)
+    public async Task<Dictionary<string, List<int>>> Handle(GetBusyRoomsQuery request, CancellationToken cancellationToken)
     {
+        // Получаем все записи
         var allBookings = await _roomDynamicRepository.GetAll();
 
-        var busyRoom = new BusyRoomDto("666", 2, DateTime.Now);
-
-        return //new List<BusyRoomDto> {busyRoom};
-            allBookings
-            // .Where(b => b.BookingDate.Value.Date == request.Date.Date && 
-            //             b.LessonNumber.Value == request.PairNumber)
-            .Select(b => new BusyRoomDto(
-                RoomNumber: b.RoomStaticId.Value,  
-                LessonNumber: b.LessonNumber.Value,
-                BookingDate: b.BookingDate.Value
-            ))
-            .ToList();
+        // Формируем словарь
+        return allBookings
+            .Where(b => b.BookingDate.Value.Date == request.Date.Date) // Фильтруем только по нужной дате
+            .GroupBy(b => b.RoomStaticId.Value) // Группируем по номеру комнаты
+            .ToDictionary(
+                group => group.Key, // Ключ: "509"
+                group => group
+                    .Select(b => b.LessonNumber.Value) // Выбираем номера пар
+                    .Distinct()                        // Убираем дубликаты
+                    .OrderBy(n => n)                   // Сортируем (1, 2, 3...)
+                    .ToList()
+            );
     }
 }
