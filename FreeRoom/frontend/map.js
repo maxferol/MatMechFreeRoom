@@ -15,6 +15,7 @@ window.onload = function () {
     // Глобальные переменные для статусов
     let roomsStatus = {};
     let currentPair = null;
+    let currentDate = null;
     let isDataLoaded = false;
     let currentFloor = 6;
     let currentRooms = [];
@@ -34,26 +35,28 @@ window.onload = function () {
         return null;
     }
 
-    // Функция запроса к бэкенду
+    // Функция форматирования даты
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
     // Функция запроса к бэкенду
     window.fetchBusyRooms = async function (date, pairNumber) {
         try {
-            // Проверяем, не заблокирован ли fetch
             if (!window.fetch) {
                 console.error('fetch API недоступен');
                 return [];
             }
 
             const url = `http://localhost:5000/api/rooms/busy?date=${date}`;
-            console.log('Пытаемся запросить:', url);
+            console.log(`Запрос занятых комнат для ${date}:`, url);
 
-            // Таймаут на случай блокировки
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
             const response = await fetch(url, {
                 signal: controller.signal,
-                mode: 'cors', // явно указываем CORS
+                mode: 'cors',
                 cache: 'no-cache'
             });
 
@@ -64,7 +67,7 @@ window.onload = function () {
             }
 
             const data = await response.json();
-            console.log('Получены данные:', data);
+            console.log(`Получены данные для ${date}:`, data);
 
             if (data.busyRooms && Array.isArray(data.busyRooms)) {
                 return data.busyRooms;
@@ -73,10 +76,9 @@ window.onload = function () {
 
         } catch (error) {
             if (error.name === 'AbortError') {
-                console.error('Таймаут запроса - возможно блокировка расширением');
+                console.error('Таймаут запроса');
             } else if (error.message === 'Failed to fetch') {
-                console.error('Запрос заблокирован. Проверьте расширения браузера (AdBlock, uBlock и т.д.)');
-                console.error('Или включите CORS в бэкенде');
+                console.error('Запрос заблокирован. Проверьте расширения браузера');
             } else {
                 console.error('Ошибка получения занятых комнат:', error);
             }
@@ -86,13 +88,37 @@ window.onload = function () {
 
     // Функция обновления статусов комнат
     window.updateRoomsStatus = function (busyRooms, pair) {
+        // Очищаем текущие статусы
         for (let key in roomsStatus) {
             delete roomsStatus[key];
         }
 
+        // Заполняем новые статусы
         busyRooms.forEach(roomName => {
-            roomsStatus[roomName] = [pair];
+            // Нормализуем название комнаты (убираем пробелы и приводим к нижнему регистру)
+            const normalizedName = roomName.toString().trim();
+            roomsStatus[normalizedName] = [pair];
         });
+        
+        console.log('Обновлены статусы комнат:', roomsStatus);
+    };
+
+    // Функция загрузки данных для выбранной даты и пары
+    window.loadRoomsData = async function (date, pair) {
+        console.log(`Загрузка данных для даты: ${formatDate(date)}, пары: ${pair}`);
+        
+        currentDate = date;
+        currentPair = pair;
+        
+        if (pair !== null) {
+            const busyRooms = await window.fetchBusyRooms(formatDate(date), pair);
+            window.updateRoomsStatus(busyRooms, pair);
+            console.log(`Загружены занятые комнаты для ${pair} пары:`, busyRooms);
+        } else {
+            window.updateRoomsStatus([], pair);
+        }
+        
+        draw();
     };
 
     // Функция проверки, занята ли комната
@@ -451,41 +477,26 @@ window.onload = function () {
 
     // Инициализация данных (основная функция)
     async function initData() {
-        currentPair = getCurrentPair();
-
         const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0];
-
-        if (currentPair !== null) {
-            const busyRooms = await window.fetchBusyRooms(formattedDate, currentPair);
-            window.updateRoomsStatus(busyRooms, currentPair);
-            console.log(`Загружены занятые комнаты для ${currentPair} пары:`, busyRooms);
-        } else {
-            window.updateRoomsStatus([], currentPair);
-        }
-
+        const initialPair = getCurrentPair();
+        
+        // Загружаем данные для текущей даты и пары
+        await window.loadRoomsData(today, initialPair);
+        
         isDataLoaded = true;
-
+        draw();
+        
+        // Автообновление каждую минуту (только для текущего времени)
         setInterval(async () => {
             const newPair = getCurrentPair();
-            const newDate = new Date().toISOString().split('T')[0];
-
+            const now = new Date();
+            
+            // Обновляем только если изменилась пара
             if (newPair !== currentPair) {
-                currentPair = newPair;
-
-                if (currentPair !== null) {
-                    const busyRooms = await window.fetchBusyRooms(newDate, currentPair);
-                    window.updateRoomsStatus(busyRooms, currentPair);
-                    console.log(`Обновлены занятые комнаты для ${currentPair} пары:`, busyRooms);
-                } else {
-                    window.updateRoomsStatus([], currentPair);
-                }
-
+                await window.loadRoomsData(now, newPair);
                 draw();
             }
         }, 60000);
-
-        draw();
     }
 
     // Запуск
@@ -494,8 +505,8 @@ window.onload = function () {
     initData();
 };
 
-// Функция открытия модального окна (если её нет, добавьте)
+// Функция открытия модального окна
 function openRoomModal(roomName) {
     console.log(`Открыто окно для комнаты ${roomName}`);
-    // Здесь ваша реализация модального окна
+    alert(`Комната ${roomName}\nСтатус: ${window.hasClassNow ? (window.hasClassNow(roomName) ? 'Занята' : 'Свободна') : 'Нет данных'}`);
 }

@@ -15,18 +15,19 @@ public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, List<
 
     public async Task<List<BusyRoomDto>> Handle(GetBusyRoomsQuery request, CancellationToken cancellationToken)
     {
-        //var allBookings = await _roomDynamicRepository.GetAll();
+        var allBookings = await _roomDynamicRepository.GetAll();
 
         var busyRoom = new BusyRoomDto("666", 2, DateTime.Now);
 
-        return new List<BusyRoomDto> {busyRoom};/*allBookings
-            .Where(b => b.BookingDate.Value.Date == request.Date.Date && 
-                        b.LessonNumber.Value == request.PairNumber)
+        return //new List<BusyRoomDto> {busyRoom};
+            allBookings
+            // .Where(b => b.BookingDate.Value.Date == request.Date.Date && 
+            //             b.LessonNumber.Value == request.PairNumber)
             .Select(b => new BusyRoomDto(
-                RoomNumber: b.RoomStaticId.Value,  // RoomStaticId.Value уже строка (например "612")
+                RoomNumber: b.RoomStaticId.Value,  
                 LessonNumber: b.LessonNumber.Value,
                 BookingDate: b.BookingDate.Value
             ))
-            .ToList();*/
+            .ToList();
     }
 }
