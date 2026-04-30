@@ -15,7 +15,7 @@ public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, List<
 
     public async Task<List<BusyRoomDto>> Handle(GetBusyRoomsQuery request, CancellationToken cancellationToken)
     {
-        var allBookings = await _roomDynamicRepository.GetAll();
+        //var allBookings = await _roomDynamicRepository.GetAll();
 
         var busyRoom = new BusyRoomDto("666", 2, DateTime.Now);
 

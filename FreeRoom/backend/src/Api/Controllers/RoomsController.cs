@@ -22,10 +22,9 @@ public class RoomsController : ControllerBase
     /// Получить список занятых аудиторий по дате и паре
     /// </summary>
     /// <param name="date">Дата в формате YYYY-MM-DD</param>
-    /// <param name="pair">Номер пары (1-6)</param>
     /// <returns>Список номеров занятых аудиторий</returns>
     [HttpGet("busy")]
-    public async Task<IActionResult> GetBusyRooms([FromQuery] string date, [FromQuery] int pair)
+    public async Task<IActionResult> GetBusyRooms([FromQuery] string date)
     {
         try
         {
@@ -35,20 +34,13 @@ public class RoomsController : ControllerBase
                 return BadRequest(new { error = "Неверный формат даты. Используйте YYYY-MM-DD" });
             }
 
-            // Проверяем номер пары
-            if (pair < 1 || pair > 6)
-            {
-                return BadRequest(new { error = "Номер пары должен быть от 1 до 6" });
-            }
-
             // Отправляем запрос через MediatR
-            var busyRooms = await _mediator.Send(new GetBusyRoomsQuery(parsedDate, pair));
+            var busyRooms = await _mediator.Send(new GetBusyRoomsQuery(parsedDate));
             
             return Ok(new
             {
                 success = true,
                 date = date,
-                pair = pair,
                 busyRooms = busyRooms.Select(b => b.RoomNumber).ToList()
             });
         }
@@ -57,4 +49,11 @@ public class RoomsController : ControllerBase
             return StatusCode(500, new { error = $"Внутренняя ошибка сервера: {ex.Message}" });
         }
     }
+
+
+[HttpGet("test")]
+public IActionResult Test()
+{
+    return Ok(new { message = "Бэкенд доступен", timestamp = DateTime.Now });
+}
 }

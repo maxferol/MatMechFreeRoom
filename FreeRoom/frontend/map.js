@@ -38,14 +38,33 @@ window.onload = function () {
     // Функция запроса к бэкенду
     window.fetchBusyRooms = async function (date, pairNumber) {
         try {
-            // Используем абсолютный URL к бэкенду (порт 5000)
-            const response = await fetch(`http://localhost:5000/api/rooms/busy?date=${date}&pair=${pairNumber}`);
+            // Проверяем, не заблокирован ли fetch
+            if (!window.fetch) {
+                console.error('fetch API недоступен');
+                return [];
+            }
+
+            const url = `http://localhost:5000/api/rooms/busy?date=${date}`;
+            console.log('Пытаемся запросить:', url);
+
+            // Таймаут на случай блокировки
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            const response = await fetch(url, {
+                signal: controller.signal,
+                mode: 'cors', // явно указываем CORS
+                cache: 'no-cache'
+            });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('Получены данные:', data);
 
             if (data.busyRooms && Array.isArray(data.busyRooms)) {
                 return data.busyRooms;
@@ -53,9 +72,13 @@ window.onload = function () {
             return [];
 
         } catch (error) {
-            // Используем window.console вместо просто console
-            if (window.console) {
-                window.console.error('Ошибка получения занятых комнат:', error);
+            if (error.name === 'AbortError') {
+                console.error('Таймаут запроса - возможно блокировка расширением');
+            } else if (error.message === 'Failed to fetch') {
+                console.error('Запрос заблокирован. Проверьте расширения браузера (AdBlock, uBlock и т.д.)');
+                console.error('Или включите CORS в бэкенде');
+            } else {
+                console.error('Ошибка получения занятых комнат:', error);
             }
             return [];
         }
