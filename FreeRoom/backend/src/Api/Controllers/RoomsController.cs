@@ -24,31 +24,16 @@ public class RoomsController : ControllerBase
     /// <param name="date">Дата в формате YYYY-MM-DD</param>
     /// <returns>Список номеров занятых аудиторий</returns>
     [HttpGet("busy")]
-    public async Task<IActionResult> GetBusyRooms([FromQuery] string date)
-    {
-        try
-        {
-            // Парсим дату
-            if (!DateTime.TryParse(date, out var parsedDate))
-            {
-                return BadRequest(new { error = "Неверный формат даты. Используйте YYYY-MM-DD" });
-            }
+public async Task<IActionResult> GetBusyRooms([FromQuery] string date)
+{
+    if (!DateTime.TryParse(date, out var parsedDate))
+        return BadRequest(new { error = "Неверный формат даты" });
 
-            // Отправляем запрос через MediatR
-            var busyRooms = await _mediator.Send(new GetBusyRoomsQuery(parsedDate));
-            
-            return Ok(new
-            {
-                success = true,
-                date = date,
-                busyRooms = busyRooms.Select(b => b.RoomNumber).ToList()
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = $"Внутренняя ошибка сервера: {ex.Message}" });
-        }
-    }
+    var schedule = await _mediator.Send(new GetBusyRoomsQuery(parsedDate));
+    
+    // Возвращаем словарь напрямую
+    return Ok(schedule);
+}
 
 
 [HttpGet("test")]

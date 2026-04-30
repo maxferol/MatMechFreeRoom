@@ -14,19 +14,17 @@ public class GetBusyRoomsQueryHandler : IRequestHandler<GetBusyRoomsQuery, Dicti
 
     public async Task<Dictionary<string, List<int>>> Handle(GetBusyRoomsQuery request, CancellationToken cancellationToken)
     {
-        // Получаем все записи
         var allBookings = await _roomDynamicRepository.GetAll();
-
-        // Формируем словарь
+    
         return allBookings
-            .Where(b => b.BookingDate.Value.Date == request.Date.Date) // Фильтруем только по нужной дате
-            .GroupBy(b => b.RoomStaticId.Value) // Группируем по номеру комнаты
+            .Where(b => b.RoomStaticId != null)
+            .GroupBy(b => b.RoomStaticId.Value) // Value может понадобиться, если RoomStaticId - Value Object
             .ToDictionary(
-                group => group.Key, // Ключ: "509"
+                group => group.Key.ToString(), // Преобразуем в строку
                 group => group
-                    .Select(b => b.LessonNumber.Value) // Выбираем номера пар
-                    .Distinct()                        // Убираем дубликаты
-                    .OrderBy(n => n)                   // Сортируем (1, 2, 3...)
+                    .Select(b => b.LessonNumber.Value) // Берем Value из Value Object
+                    .Distinct()
+                    .OrderBy(n => n)
                     .ToList()
             );
     }
