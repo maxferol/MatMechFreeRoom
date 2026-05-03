@@ -13,7 +13,7 @@ public class RoomDynamic
 
     public static List<RoomDynamic> BookingRoomList { get; private set; } = new List<RoomDynamic>();
 
-    private RoomDynamic(RoomStaticId roomStaticId, UserId userId, LessonNumber lessonNumber, BookingDate bookingDate)
+    public RoomDynamic(RoomStaticId roomStaticId, UserId userId, LessonNumber lessonNumber, BookingDate bookingDate)
     {
         LessonNumber = lessonNumber;
         BookingDate = bookingDate;

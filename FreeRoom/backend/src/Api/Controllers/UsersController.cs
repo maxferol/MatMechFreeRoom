@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using FreeRoom.backend.src.Application.DTOs;
 using FreeRoom.backend.src.Application.Users.Queries;
+using FreeRoom.backend.src.Application.Rooms.Commands;
 
 namespace FreeRoom.backend.src.API.Controllers;
 
@@ -31,6 +32,17 @@ public class UsersController : ControllerBase
         {
             return StatusCode(500, new { error = "Внутренняя ошибка сервера при получении бронирований" });
         }
+    }
+
+    [HttpPost("booking")]
+    public async Task<IActionResult> BookingRoom([FromBody] CreateBookingDto dto)
+    {
+        var success = await _mediator.Send(new BookingRoomQuery(dto));
+        
+        if (!success)
+            return Conflict(new { message = "Аудитория уже занята на это время" });
+
+        return Ok(new { message = "Успешно забронировано" });
     }
 
     // [HttpPost("register")]
