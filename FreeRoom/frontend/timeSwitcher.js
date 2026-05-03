@@ -28,54 +28,23 @@ async function updateRoomsStatusForSelection() {
     
     console.log(`Обновление статусов: дата=${date}, пара=${pair}`);
     
-    // Вызываем функцию из map.js для получения занятых комнат
-    if (typeof window.fetchBusyRooms === 'function') {
-        const busyRooms = await window.fetchBusyRooms(date, pair);
-        
-        // Обновляем roomsStatus в map.js
-        if (typeof window.updateRoomsStatus === 'function') {
-            window.updateRoomsStatus(busyRooms, pair);
-        } else {
-            // Прямое обновление, если функции нет
-            if (typeof roomsStatus !== 'undefined') {
-                window.roomsStatus = {};
-                busyRooms.forEach(roomName => {
-                    window.roomsStatus[roomName] = [pair];
-                });
+    // Обновляем выбранную пару в map.js
+    if (typeof window.updateSelectedPair === 'function') {
+        window.updateSelectedPair(pair);
+    }
+    
+    // Обновляем выбранную дату в map.js и загружаем данные
+    if (typeof window.updateSelectedDate === 'function') {
+        await window.updateSelectedDate(selectedDate);
+    } else {
+        // Fallback: используем старый метод
+        if (typeof window.fetchBusyRooms === 'function') {
+            const busyRooms = await window.fetchBusyRooms(date);
+            if (typeof window.updateRoomsStatus === 'function') {
+                window.updateRoomsStatus(busyRooms);
             }
         }
-        
-        // Перерисовываем карту
-        if (typeof draw === 'function') {
-            draw();
-        }
-    } else {
-        console.warn('fetchBusyRooms не найдена в map.js');
     }
-}
-
-// Функция обновления комнат для выбранной пары
-async function updateRoomsForSelectedPair() {
-    if (selectedPair !== null) {
-        if (typeof currentPair !== 'undefined') {
-            window.currentPair = selectedPair;
-        }
-    } else {
-        if (typeof window.getCurrentPairNumber === 'function') {
-            window.currentPair = window.getCurrentPairNumber();
-        }
-    }
-    
-    // Обновляем статусы для выбранной пары и текущей даты
-    await updateRoomsStatusForSelection();
-}
-
-// Функция обновления для выбранной даты
-async function updateScheduleForDate() {
-    console.log(`Загрузка расписания для ${formatDate(selectedDate)} (${getWeekday(selectedDate)})`);
-    
-    // Обновляем статусы для выбранной даты и текущей пары
-    await updateRoomsStatusForSelection();
 }
 
 // Инициализация контролов даты и пары
@@ -115,7 +84,7 @@ function initDateAndPairControls() {
                 }
 
                 console.log(`Выбрана дата: ${formatDate(selectedDate)}`);
-                await updateScheduleForDate();
+                await updateRoomsStatusForSelection();
             });
         }
     });
@@ -162,7 +131,7 @@ function initDateAndPairControls() {
 
                 customDateModal.classList.remove('show');
                 console.log(`Выбрана кастомная дата: ${formatDate(selectedDate)}`);
-                await updateScheduleForDate();
+                await updateRoomsStatusForSelection();
             }
         });
     }
@@ -178,7 +147,7 @@ function initDateAndPairControls() {
             btn.classList.add('active');
 
             console.log(`Выбрана пара: ${selectedPair}`);
-            await updateRoomsForSelectedPair();
+            await updateRoomsStatusForSelection();
         });
     });
 }
@@ -187,8 +156,6 @@ function initDateAndPairControls() {
 window.selectedDate = selectedDate;
 window.selectedPair = selectedPair;
 window.formatDate = formatDate;
-window.updateScheduleForDate = updateScheduleForDate;
-window.updateRoomsForSelectedPair = updateRoomsForSelectedPair;
 window.updateRoomsStatusForSelection = updateRoomsStatusForSelection;
 
 // Запускаем инициализацию после загрузки страницы
