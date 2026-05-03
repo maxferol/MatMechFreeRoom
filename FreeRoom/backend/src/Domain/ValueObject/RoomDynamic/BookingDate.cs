@@ -2,7 +2,7 @@
 
 public class BookingDate
 {
-    readonly static DateTime MinDateBooking = DateTime.Now;
+    readonly static DateTime MinDateBooking = DateTime.Now.Date;
     readonly static DateTime MaxDateBooking = MinDateBooking + TimeSpan.FromDays(3);
     public DateTime Value { get; }
     

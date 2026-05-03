@@ -17,7 +17,7 @@ public class RoomDynamicTester
         _repository = new RoomDynamicMongoDB(connectionString, dbName);
     }
 
-    public async Task CreateRoomsFromJson(string jsonString)
+    public async Task CreateRoomsFromJson(string jsonString, DateTime dateCorrect)
     {
         Console.WriteLine("\n>>> НАЧАЛО МАССОВОГО ДОБАВЛЕНИЯ ИЗ JSON <<<");
 
@@ -30,7 +30,7 @@ public class RoomDynamicTester
             if (roomsData == null) return;
 
             var userId = new UserId(Guid.NewGuid()); // Допустим, бронит один "системный" юзер
-            var date = new BookingDate(DateTime.UtcNow.AddDays(1)); // На завтра
+            var date = new BookingDate(dateCorrect);
 
             foreach (var entry in roomsData)
             {

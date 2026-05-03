@@ -60,11 +60,11 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         {
             if (roomDynamic == null)
                 throw new ArgumentNullException(nameof(roomDynamic), "RoomDynamic не должен быть null");
-            // if (await GetByEqualsRoom(roomDynamic) != null)
-            // {
-            //     Console.WriteLine("Такая аудитория уже есть!");
-            //     return null;
-            // }
+            if (await GetByEqualsRoom(roomDynamic) != null)
+            {
+                Console.WriteLine("Такая аудитория уже есть!");
+                return null;
+            }
 
             var bsonDocument = new BsonDocument
             {
@@ -110,7 +110,8 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
             var filterBuilder = Builders<BsonDocument>.Filter;
             var filter = filterBuilder.And(
                 filterBuilder.Eq("bookingDate", roomDynamic.BookingDate.Value),
-                filterBuilder.Eq("roomStaticId", roomDynamic.RoomStaticId.ToString())
+                filterBuilder.Eq("roomStaticId", roomDynamic.RoomStaticId.ToString()),
+                filterBuilder.Eq("lessonNumber", roomDynamic.LessonNumber.Value)
             );
 
             var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
