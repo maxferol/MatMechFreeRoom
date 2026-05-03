@@ -1,17 +1,18 @@
-﻿namespace FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
-
-public class BookingDate
+﻿public class BookingDate
 {
-    readonly static DateTime MinDateBooking = DateTime.Now.Date;
-    readonly static DateTime MaxDateBooking = MinDateBooking + TimeSpan.FromDays(3);
+    private static DateTime MinDateBooking => DateTime.UtcNow.Date; 
+    private static DateTime MaxDateBooking => MinDateBooking.AddDays(3);
+
     public DateTime Value { get; }
-    
-    //private BookingDate() { }
 
     public BookingDate(DateTime value)
     {
-        if (value < MinDateBooking || value > MaxDateBooking)
-            throw new ArgumentOutOfRangeException($"Время бронирования не попадает в заданный диапазон: [{MinDateBooking},{MaxDateBooking}]",nameof(value));
-        Value = value;
+        var dateToCheck = value.ToUniversalTime().Date;
+
+        if (dateToCheck < MinDateBooking || dateToCheck > MaxDateBooking)
+            throw new ArgumentOutOfRangeException(nameof(value), 
+                $"Время бронирования {dateToCheck} не попадает в диапазон: [{MinDateBooking}, {MaxDateBooking}]");
+        
+        Value = dateToCheck;
     }
 }
