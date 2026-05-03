@@ -15,7 +15,7 @@ window.onload = function () {
     // Глобальные переменные для статусов
     let roomsStatus = {};
     let currentPair = null;
-    let currentDate = null;
+    window.currentDate = null;
     let isDataLoaded = false;
     let currentFloor = 6;
     let currentRooms = [];
@@ -36,8 +36,12 @@ window.onload = function () {
     }
 
     // Функция форматирования даты
+    // Функция форматирования даты (с учетом локального времени)
     function formatDate(date) {
-        return date.toISOString().split('T')[0];
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     // Функция сохранения данных в localStorage (вместо файла)
@@ -166,18 +170,21 @@ window.onload = function () {
     }
 
     // Функция для обновления выбранной пары из свитчера
+    // Функция для обновления выбранной пары из свитчера (БЕЗ запроса к бэкенду)
     window.updateSelectedPair = function (pairNumber) {
         console.log(`Обновление выбранной пары в map.js: ${pairNumber}`);
         selectedPairFromSwitcher = pairNumber;
-        currentPair = pairNumber; // Также обновляем currentPair для совместимости
-        draw(); // Перерисовываем карту
+        currentPair = pairNumber;
+        draw(); // Просто перерисовываем карту с новым фильтром
     }
 
-    // Функция для обновления выбранной даты
+    // Функция для обновления выбранной даты (ТОЛЬКО при смене даты)
     window.updateSelectedDate = async function (date) {
         console.log(`Обновление выбранной даты в map.js: ${date}`);
         currentDate = date;
+        window.currentDate = date;  // Сохраняем глобально
         const dateStr = formatDate(date);
+
         const roomsDict = await window.fetchBusyRooms(dateStr);
         window.updateRoomsStatus(roomsDict);
         draw();
@@ -543,7 +550,7 @@ window.onload = function () {
 };
 
 // Функция получения текущей пары (для начальной инициализации)
-window.getCurrentPairNumber = function() {
+window.getCurrentPairNumber = function () {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
 

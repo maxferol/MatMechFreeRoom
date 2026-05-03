@@ -1,4 +1,5 @@
-﻿using FreeRoom.backend.src.Infrastructure;
+﻿using FreeRoom;
+using FreeRoom.backend.src.Infrastructure;
 using FreeRoom.backend.src.Infrastructure.RoomStorage;
 using FreeRoom.backend.src.Infrastructure.UserStorage;
 using FreeRoom.backend.src.Domain.Interfaces;
@@ -59,13 +60,29 @@ app.Use(async (context, next) =>
 app.MapControllers();
 
 Console.WriteLine("Сервер запущен на http://localhost:5000");
-
-//5. Заполнение данными
-string rawJson = "{\"509\": [3, 6, 5, 4], \"611\": [2, 3, 4, 5], \"601\": [4, 3, 1, 2, 5], \"628\": [4, 2, 7, 5], \"517\": [4, 3, 5, 2, 1], \"602\": [3, 4], \"526\": [3], \"528\": [2, 4, 3], \"625\": [4, 1, 2, 3, 5, 6], \"608\": [4, 1, 2, 5, 3], \"623\": [3, 4, 1, 2, 5], \"513\": [2, 3, 4], \"532\": [2, 3, 1], \"605\": [1, 2, 3, 5], \"622а\": [5, 3, 2, 4, 1], \"511\": [4, 2, 3, 1, 5], \"515\": [5, 3, 4, 1, 2], \"612\": [1, 4, 5, 2, 3], \"632\": [4, 3, 6], \"514\": [3, 1, 4, 2, 5], \"622\": [5, 3, 2], \"621\": [3, 4, 2, 6], \"518\": [6]}";
-var tester = new RoomDynamicTester(connectionString, databaseName);
-var date = DateTime.UtcNow.Date;
-var normalDate = date.Date;
-await tester.CreateRoomsFromJson(rawJson, normalDate);
+//
+// try
+// {
+//     var parser = new ScheduleParser(connectionString, databaseName);
+//     
+//     // Путь к файлу с расписанием
+//     string scheduleJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "schedule_week.json");
+//     
+//     // Альтернативный путь -从 корня проекта
+//     if (!File.Exists(scheduleJsonPath))
+//     {
+//         scheduleJsonPath = Path.Combine(Directory.GetCurrentDirectory(), "schedule_week.json");
+//     }
+//     
+//     if (File.Exists(scheduleJsonPath))
+//     {
+//         await parser.LoadScheduleFromJsonFile(scheduleJsonPath);
+//     }
+// }
+// catch (Exception ex)
+// {
+//     Console.WriteLine($"❌ Ошибка при загрузке расписания: {ex.Message}");
+// }
 
 
 // var tester = new UserMongoTester(connectionString, databaseName);

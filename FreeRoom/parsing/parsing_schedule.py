@@ -13,7 +13,7 @@ dates_to_parse = [(start_date + timedelta(days=i)).isoformat() for i in range(7)
 def check_address_and_auditory(subject):
     """Проверяем, что аудитория находится по адресу Тургенева, 4 и начинается с 6"""
     if (subject.get('auditoryLocation') and 'Тургенева, 4' in subject['auditoryLocation'] 
-            and subject.get('auditoryTitle') and subject['auditoryTitle'][0] == '6'):
+            and subject.get('auditoryTitle') and (subject['auditoryTitle'][0] == '6' or subject['auditoryTitle'][0] == '5')):
         return True
     return False
 

@@ -301,29 +301,38 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
 
     private static RoomDynamic MapToRoomDynamic(BsonDocument document)
     {
-        // 1. Создаем необходимые Value Objects из документа
-        var roomStaticId = new RoomStaticId(document["roomStaticId"].AsString);
-        var userId = new UserId(Guid.Parse(document["userId"].AsString));
-        var lessonNumber = new LessonNumber(document["lessonNumber"].AsInt32);
-        var bookingDate = new BookingDate(document["bookingDate"].ToUniversalTime());
-
-        // 2. Вызываем приватный конструктор через рефлексию
-        var roomDynamic = (RoomDynamic)Activator.CreateInstance(
-            typeof(RoomDynamic), 
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, 
-            null, 
-            new object[] { roomStaticId, userId, lessonNumber, bookingDate }, 
-            null)!;
-
-        // 3. Устанавливаем Id (так как он не в конструкторе, а инициализируется отдельно)
-        var idProperty = typeof(RoomDynamic).GetProperty("Id");
-        if (document.Contains("roomDynamicId"))
+        try
         {
-            var idValue = new RoomDynamicId(Guid.Parse(document["roomDynamicId"].AsString));
-            idProperty?.SetValue(roomDynamic, idValue);
-        }
+            Console.WriteLine($"MapToRoomDynamic: starting mapping for document");
+        
+            // 1. Создаем необходимые Value Objects из документа
+            var roomStaticId = new RoomStaticId(document["roomStaticId"].AsString);
+            var userId = new UserId(Guid.Parse(document["userId"].AsString));
+            var lessonNumber = new LessonNumber(document["lessonNumber"].AsInt32);
+            var bookingDate = new BookingDate(document["bookingDate"].ToUniversalTime());
 
-        return roomDynamic;
+            Console.WriteLine($"MapToRoomDynamic: created Value Objects - roomStaticId={roomStaticId.Value}, userId={userId.Value}, lessonNumber={lessonNumber.Value}, bookingDate={bookingDate.Value}");
+        
+            // 2. Используем публичный конструктор напрямую (без рефлексии)
+            var roomDynamic = new RoomDynamic(roomStaticId, userId, lessonNumber, bookingDate);
+
+            // 3. Устанавливаем Id
+            if (document.Contains("roomDynamicId"))
+            {
+                var idValue = new RoomDynamicId(Guid.Parse(document["roomDynamicId"].AsString));
+                var idProperty = typeof(RoomDynamic).GetProperty("Id");
+                idProperty?.SetValue(roomDynamic, idValue);
+                Console.WriteLine($"MapToRoomDynamic: set Id={idValue.Value}");
+            }
+
+            return roomDynamic;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MapToRoomDynamic error: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     public async Task<bool> IncrementViewCountAsync(Guid id)

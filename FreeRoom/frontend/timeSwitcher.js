@@ -18,38 +18,44 @@ function getWeekday(date) {
 
 // Функция обновления статусов комнат для выбранных даты и пары
 async function updateRoomsStatusForSelection() {
-    const date = formatDate(selectedDate);
-    const pair = selectedPair !== null ? selectedPair : (window.getCurrentPairNumber ? window.getCurrentPairNumber() : null);
+    const dateStr = formatDate(selectedDate);
+    let pair = selectedPair;
     
-    if (!pair) {
-        console.log('Нет выбранной пары');
-        return;
+    // Если пара не выбрана вручную, берем текущую или первую
+    if (pair === null) {
+        if (typeof window.getCurrentPairNumber === 'function') {
+            pair = window.getCurrentPairNumber();
+        }
+        if (pair === null) {
+            pair = 1;
+            console.log('Нет активной пары, выбрана 1 пара по умолчанию');
+        }
     }
     
-    console.log(`Обновление статусов: дата=${date}, пара=${pair}`);
+    console.log(`Обновление: дата=${dateStr}, пара=${pair}`);
     
-    // Обновляем выбранную пару в map.js
+    // Проверяем, загружены ли данные для этой даты
+    const currentDateInMap = window.currentDate ? formatDate(window.currentDate) : null;
+    
+    if (currentDateInMap !== dateStr) {
+        // Дата изменилась - нужно загрузить новые данные с бэкенда
+        console.log(`Дата изменилась с ${currentDateInMap} на ${dateStr}, загружаем данные с бэкенда`);
+        if (typeof window.updateSelectedDate === 'function') {
+            await window.updateSelectedDate(selectedDate);
+        }
+    } else {
+        // Дата не изменилась - используем кэшированные данные
+        console.log(`Дата не изменилась (${dateStr}), используем кэшированные данные`);
+    }
+    
+    // Обновляем пару (просто перерисовка)
     if (typeof window.updateSelectedPair === 'function') {
         window.updateSelectedPair(pair);
-    }
-    
-    // Обновляем выбранную дату в map.js и загружаем данные
-    if (typeof window.updateSelectedDate === 'function') {
-        await window.updateSelectedDate(selectedDate);
-    } else {
-        // Fallback: используем старый метод
-        if (typeof window.fetchBusyRooms === 'function') {
-            const busyRooms = await window.fetchBusyRooms(date);
-            if (typeof window.updateRoomsStatus === 'function') {
-                window.updateRoomsStatus(busyRooms);
-            }
-        }
     }
 }
 
 // Инициализация контролов даты и пары
 function initDateAndPairControls() {
-    // Обработчики кнопок даты
     const dateBtns = document.querySelectorAll('.date-btn');
     const customDateBtn = document.getElementById('customDateBtn');
     const customDateModal = document.getElementById('customDateModal');
@@ -59,7 +65,6 @@ function initDateAndPairControls() {
 
     if (!customDateBtn || !customDateModal) return;
 
-    // Устанавливаем сегодняшнюю дату в input
     if (customDateInput) {
         customDateInput.value = formatDate(selectedDate);
     }
@@ -73,11 +78,9 @@ function initDateAndPairControls() {
                 newDate.setDate(newDate.getDate() + days);
                 selectedDate = newDate;
 
-                // Обновляем активный класс
                 dateBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
-                // Сбрасываем кастомную кнопку
                 if (customDateBtn) {
                     customDateBtn.innerHTML = '📅 Выбрать';
                     customDateBtn.classList.remove('active');
@@ -94,7 +97,6 @@ function initDateAndPairControls() {
         customDateModal.classList.add('show');
     });
 
-    // Закрытие модалки
     if (closeDateModal) {
         closeDateModal.addEventListener('click', () => {
             customDateModal.classList.remove('show');
@@ -116,14 +118,12 @@ function initDateAndPairControls() {
             if (dateValue) {
                 selectedDate = new Date(dateValue);
 
-                // Деактивируем все стандартные кнопки
                 dateBtns.forEach(btn => {
                     if (btn.dataset.days !== undefined) {
                         btn.classList.remove('active');
                     }
                 });
 
-                // Меняем текст кнопки выбора даты
                 const dateParts = dateValue.split('-');
                 const formattedDate = `${dateParts[2]}.${dateParts[1]}`;
                 customDateBtn.innerHTML = `📅 ${formattedDate}`;
@@ -145,6 +145,7 @@ function initDateAndPairControls() {
 
             pairBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            btn.classList.add('user-selected');
 
             console.log(`Выбрана пара: ${selectedPair}`);
             await updateRoomsStatusForSelection();
@@ -152,7 +153,7 @@ function initDateAndPairControls() {
     });
 }
 
-// Экспортируем функции для использования в map.js
+// Экспортируем функции
 window.selectedDate = selectedDate;
 window.selectedPair = selectedPair;
 window.formatDate = formatDate;
@@ -162,12 +163,11 @@ window.updateRoomsStatusForSelection = updateRoomsStatusForSelection;
 document.addEventListener('DOMContentLoaded', function () {
     initDateAndPairControls();
     
-    // Устанавливаем начальную пару (текущую)
+    // Устанавливаем начальную пару
     if (typeof window.getCurrentPairNumber === 'function') {
         const currentPairNum = window.getCurrentPairNumber();
-        if (currentPairNum) {
+        if (currentPairNum !== null) {
             selectedPair = currentPairNum;
-            // Подсвечиваем кнопку текущей пары
             const pairBtns = document.querySelectorAll('.pair-btn');
             pairBtns.forEach(btn => {
                 const pair = parseInt(btn.dataset.pair);
@@ -175,11 +175,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     btn.classList.add('active');
                 }
             });
+        } else {
+            selectedPair = 1;
+            const firstPairBtn = document.querySelector('.pair-btn[data-pair="1"]');
+            if (firstPairBtn) {
+                firstPairBtn.classList.add('active');
+            }
+            console.log('Нет активной пары, выбрана 1 пара по умолчанию');
         }
     }
     
-    // Загружаем статусы для начальных значений
+    // Загружаем данные для начальной даты
     setTimeout(async () => {
-        await updateRoomsStatusForSelection();
+        console.log(`Initial load for date: ${formatDate(selectedDate)}`);
+        const dateStr = formatDate(selectedDate);
+        
+        // Принудительно загружаем данные для начальной даты
+        if (typeof window.updateSelectedDate === 'function') {
+            await window.updateSelectedDate(selectedDate);
+        }
+        
+        // Устанавливаем пару
+        if (typeof window.updateSelectedPair === 'function') {
+            window.updateSelectedPair(selectedPair);
+        }
     }, 500);
 });

@@ -1,7 +1,7 @@
 ﻿public class BookingDate
 {
     private static DateTime MinDateBooking => DateTime.UtcNow.Date; 
-    private static DateTime MaxDateBooking => MinDateBooking.AddDays(3);
+    private static DateTime MaxDateBooking => MinDateBooking.AddDays(7);
 
     public DateTime Value { get; }
 

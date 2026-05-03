@@ -8,7 +8,7 @@ const PAIRS_DATA = [
     { number: 6, start: 17 * 60 + 50, end: 19 * 60 + 20, text: "17:50 - 19:20" }
 ];
 
-// Получить номер текущей пары
+// Получить номер текущей пары (возвращает null если сейчас ночь)
 window.getCurrentPairNumber = function() {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -18,11 +18,11 @@ window.getCurrentPairNumber = function() {
             return pair.number;
         }
     }
-    return null;
+    return null; // Нет активной пары (ночь или выходные)
 }
 
 // Получить текст текущей пары
-window.getCurrentPair = function() {
+window.getCurrentPairText = function() {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
     
@@ -36,31 +36,36 @@ window.getCurrentPair = function() {
 
 // Обновление текста на странице
 function updateScheduleText() {
-    const currentPair = window.getCurrentPair();
+    const currentPairText = window.getCurrentPairText();
     const scheduleElement = document.getElementById('current-schedule');
     
     if (scheduleElement) {
-        scheduleElement.textContent = currentPair;
+        scheduleElement.textContent = currentPairText;
     }
 }
 
-// Подсветка текущей пары в свитчере
+// Подсветка текущей пары в свитчере (только если есть активная пара)
 function highlightCurrentPair() {
     const currentPairNumber = window.getCurrentPairNumber();
     const pairBtns = document.querySelectorAll('.pair-btn');
     
+    // Если есть активная пара и не выбрана пользовательская
     if (currentPairNumber && pairBtns.length) {
-        pairBtns.forEach(btn => {
-            const btnPair = parseInt(btn.dataset.pair);
-            if (btnPair === currentPairNumber) {
-                btn.classList.add('active');
-                if (typeof window.selectedPair !== 'undefined') {
-                    window.selectedPair = currentPairNumber;
+        const hasUserSelected = Array.from(pairBtns).some(btn => btn.classList.contains('user-selected'));
+        
+        if (!hasUserSelected) {
+            pairBtns.forEach(btn => {
+                const btnPair = parseInt(btn.dataset.pair);
+                if (btnPair === currentPairNumber) {
+                    btn.classList.add('active');
+                    if (typeof window.selectedPair !== 'undefined') {
+                        window.selectedPair = currentPairNumber;
+                    }
+                } else {
+                    btn.classList.remove('active');
                 }
-            } else if (!btn.classList.contains('user-selected')) {
-                btn.classList.remove('active');
-            }
-        });
+            });
+        }
     }
 }
 
