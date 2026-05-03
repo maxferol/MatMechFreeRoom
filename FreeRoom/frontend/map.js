@@ -414,7 +414,7 @@ window.onload = function () {
         for (let i = currentRooms.length - 1; i >= 0; i--) {
             const room = currentRooms[i];
             if (ctx.isPointInPath(room.path, coords.x, coords.y)) {
-                openRoomModal(room.name);
+                openBookingModal(room.name);
                 return true;
             }
         }
