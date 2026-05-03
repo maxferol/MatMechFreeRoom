@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     
+    // Базовый URL для API
+    const API_BASE_URL = 'http://localhost:5000/api';
+    
     // ========== ФУНКЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ВИДИМОСТИ ПАРОЛЯ ==========
     function initPasswordToggles() {
         const toggles = document.querySelectorAll('.toggle-password');
@@ -21,14 +24,94 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========== ФУНКЦИЯ ДЛЯ ПЕРЕХОДА НА СТРАНИЦУ ВХОДА ==========
+    // ========== ФУНКЦИИ ДЛЯ НАВИГАЦИИ ==========
+    function goToMainPage() {
+        window.location.href = "MainPage.html";
+    }
+    
     function switchToLoginPage() {
-        window.location.href = "login.html";
+        window.location.href = "Login.html";
     }
 
-    // ========== ФУНКЦИЯ ДЛЯ ПЕРЕХОДА НА СТРАНИЦУ РЕГИСТРАЦИИ ==========
     function switchToRegisterPage() {
         window.location.href = "Registration.html";
+    }
+
+    // ========== ДОБАВЛЯЕМ КНОПКУ НАЗАД НА ГЛАВНУЮ ==========
+    function addHomeButton() {
+        // Для страницы регистрации
+        const registerCard = document.querySelector('.register-card');
+        if (registerCard && !document.getElementById('homeMainBtn')) {
+            const homeBtn = document.createElement('button');
+            homeBtn.id = 'homeMainBtn';
+            homeBtn.className = 'home-button';
+            homeBtn.innerHTML = '<i class="fas fa-home"></i> На главную';
+            homeBtn.style.position = 'absolute';
+            homeBtn.style.top = '20px';
+            homeBtn.style.left = '20px';
+            homeBtn.style.padding = '10px 20px';
+            homeBtn.style.backgroundColor = '#6c5ce7';
+            homeBtn.style.color = 'white';
+            homeBtn.style.border = 'none';
+            homeBtn.style.borderRadius = '8px';
+            homeBtn.style.cursor = 'pointer';
+            homeBtn.style.fontFamily = 'Inter, sans-serif';
+            homeBtn.style.fontSize = '14px';
+            homeBtn.style.display = 'flex';
+            homeBtn.style.alignItems = 'center';
+            homeBtn.style.gap = '8px';
+            homeBtn.style.zIndex = '1000';
+            homeBtn.style.transition = 'all 0.3s ease';
+            
+            homeBtn.onmouseenter = () => {
+                homeBtn.style.backgroundColor = '#5b4bc4';
+                homeBtn.style.transform = 'translateY(-2px)';
+            };
+            homeBtn.onmouseleave = () => {
+                homeBtn.style.backgroundColor = '#6c5ce7';
+                homeBtn.style.transform = 'translateY(0)';
+            };
+            
+            homeBtn.onclick = goToMainPage;
+            document.body.appendChild(homeBtn);
+        }
+        
+        // Для страницы логина
+        const loginCard = document.querySelector('.register-card');
+        if (loginCard && !document.getElementById('homeMainBtn')) {
+            const homeBtn = document.createElement('button');
+            homeBtn.id = 'homeMainBtn';
+            homeBtn.className = 'home-button';
+            homeBtn.innerHTML = '<i class="fas fa-home"></i> На главную';
+            homeBtn.style.position = 'absolute';
+            homeBtn.style.top = '20px';
+            homeBtn.style.left = '20px';
+            homeBtn.style.padding = '10px 20px';
+            homeBtn.style.backgroundColor = '#6c5ce7';
+            homeBtn.style.color = 'white';
+            homeBtn.style.border = 'none';
+            homeBtn.style.borderRadius = '8px';
+            homeBtn.style.cursor = 'pointer';
+            homeBtn.style.fontFamily = 'Inter, sans-serif';
+            homeBtn.style.fontSize = '14px';
+            homeBtn.style.display = 'flex';
+            homeBtn.style.alignItems = 'center';
+            homeBtn.style.gap = '8px';
+            homeBtn.style.zIndex = '1000';
+            homeBtn.style.transition = 'all 0.3s ease';
+            
+            homeBtn.onmouseenter = () => {
+                homeBtn.style.backgroundColor = '#5b4bc4';
+                homeBtn.style.transform = 'translateY(-2px)';
+            };
+            homeBtn.onmouseleave = () => {
+                homeBtn.style.backgroundColor = '#6c5ce7';
+                homeBtn.style.transform = 'translateY(0)';
+            };
+            
+            homeBtn.onclick = goToMainPage;
+            document.body.appendChild(homeBtn);
+        }
     }
 
     // ========== ЛОГИКА ДЛЯ СТРАНИЦЫ РЕГИСТРАЦИИ ==========
@@ -85,17 +168,31 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
-        // Регистрация (mock)
-        async function mockRegisterRequest(username, password) {
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    if (username.toLowerCase() === 'admin') {
-                        reject(new Error('Пользователь с таким логином уже существует'));
-                    } else {
-                        resolve({ success: true });
-                    }
-                }, 800);
+        // Реальная регистрация через API
+        async function registerRequest(username, password) {
+            const response = await fetch(`${API_BASE_URL}/users/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    login: username,
+                    password: password,
+                    firstName: username,
+                    secondName: '',
+                    role: 'User'
+                }),
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                if (response.status === 409) {
+                    throw new Error('Пользователь с таким логином уже существует');
+                }
+                throw new Error(error.message || 'Ошибка регистрации');
+            }
+
+            return await response.json();
         }
 
         // Обработчик регистрации
@@ -117,11 +214,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = passwordInput.value;
 
             try {
-                await mockRegisterRequest(username, password);
-                alert('Регистрация прошла успешно!');
+                await registerRequest(username, password);
+                alert('Регистрация прошла успешно! Теперь вы можете войти');
                 switchToLoginPage();
             } catch (err) {
-                showError(err.message || 'Ошибка регистрации');
+                showError(err.message || 'Ошибка регистрации. Попробуйте позже.');
+                console.error('Registration error:', err);
             } finally {
                 isLoading = false;
                 submitBtn.disabled = false;
@@ -166,8 +264,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 4000);
         }
 
+        function hideLoginError() {
+            loginErrorContainer.classList.add('hidden');
+        }
+
         async function handleLogin(e) {
             e.preventDefault();
+            hideLoginError();
+            
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
             
@@ -179,20 +283,58 @@ document.addEventListener('DOMContentLoaded', () => {
             loginBtn.disabled = true;
             loginBtn.innerText = 'Вход...';
             
-            setTimeout(() => {
-                if (username === 'error') {
-                    showLoginError('Неверный логин или пароль');
-                } else {
-                    alert('Успешный вход!');
-                    // Переход на главную 
+            try {
+                // Реальный запрос к API для входа
+                const response = await fetch(`${API_BASE_URL}/users/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        login: username,
+                        password: password
+                    }),
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Неверный логин или пароль');
                 }
+
+                const data = await response.json();
+                
+                // Сохраняем данные пользователя в localStorage
+                localStorage.setItem('user', JSON.stringify({
+                    login: username,
+                    token: data.token,
+                    userId: data.userId,
+                    role: data.role
+                }));
+                
+                alert('Успешный вход!');
+                // Переход на главную страницу
+                window.location.href = "MainPage.html";
+                
+            } catch (err) {
+                showLoginError(err.message || 'Ошибка входа. Проверьте логин и пароль');
+                console.error('Login error:', err);
+            } finally {
                 loginBtn.disabled = false;
                 loginBtn.innerText = 'Войти';
-            }, 700);
+            }
         }
 
         if (loginForm) {
             loginForm.addEventListener('submit', handleLogin);
+            
+            // Очищаем ошибку при вводе
+            const inputs = ['loginUsername', 'loginPassword'];
+            inputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', () => hideLoginError());
+                }
+            });
         }
         
         if (registerRedirect) {
@@ -203,5 +345,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Добавляем кнопку "На главную" на обе страницы
+    addHomeButton();
+    
     initPasswordToggles();
 });

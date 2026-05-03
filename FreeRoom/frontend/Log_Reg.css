@@ -196,6 +196,39 @@ h1 {
     transform: scale(0.98);
 }
 
+/* Добавьте в конец файла */
+.home-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    background-color: #6c5ce7;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.home-button:hover {
+    background-color: #5b4bc4;
+    transform: translateY(-2px);
+}
+
+.home-button i {
+    font-size: 16px;
+}
+
+body {
+    position: relative;
+}
+
 .register-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
