@@ -1,5 +1,4 @@
 ﻿using FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
-using FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
 using FreeRoom.backend.src.Infrastructure.GetEntitiesId;
 
 namespace FreeRoom.backend.src.Domain.Enities;

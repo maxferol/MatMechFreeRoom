@@ -87,6 +87,26 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         }
     }
 
+    public async Task<List<RoomDynamic>> GetByUserAndDate(string login, DateTime date)
+    {
+        try
+        {
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq("userId", login),
+                filterBuilder.Eq("bookingDate", date.ToUniversalTime().Date)
+            );
+
+            var documents = await CollectionRoomDynamic.Find(filter).ToListAsync();
+            return documents.Select(MapToRoomDynamic).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при получении бронирований пользователя: {ex.Message}");
+            return new List<RoomDynamic>();
+        }
+    }
+
     public async Task<RoomDynamic?> GetByRoomStaticId(string idRoomStatic)
     {
         try

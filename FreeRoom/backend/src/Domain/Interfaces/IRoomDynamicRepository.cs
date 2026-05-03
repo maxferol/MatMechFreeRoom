@@ -5,6 +5,7 @@ namespace FreeRoom.backend.src.Domain.Interfaces;
 public interface IRoomDynamicRepository
 {
     Task<RoomDynamic> CreateRoomDynamic(RoomDynamic roomDynamic);
+    Task<List<RoomDynamic>> GetByUserAndDate(string login, DateTime date);
     //Task<RoomDynamic?> GetByIdRoomDynamic(Guid id);
     Task<RoomDynamic?> GetByNumberRoomDynamic(string RoomDynamicNumber);
     Task<RoomDynamic?> UpdateRoomDynamic(RoomDynamic roomDynamic);
