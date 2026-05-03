@@ -135,16 +135,52 @@ window.onload = function () {
 
         const roomsDict = await window.fetchBusyRooms(dateStr);
         window.updateRoomsStatus(roomsDict);
-        
+
         draw();
     };
 
-    // Функция проверки, занята ли комната
+    // В начале map.js добавьте глобальные переменные
+    let selectedPairFromSwitcher = null;
+
+    // Функция проверки, занята ли комната (использует выбранную пару)
     function hasClassNow(roomName) {
-        if (!currentPair) return false;
-        const roomStatus = roomsStatus[roomName];
-        if (!roomStatus || !Array.isArray(roomStatus)) return false;
-        return roomStatus.includes(currentPair);
+        // Используем выбранную пару из свитчера, если она есть
+        let pairToUse = selectedPairFromSwitcher !== null ? selectedPairFromSwitcher : currentPair;
+
+        if (!pairToUse) {
+            console.log('Нет выбранной пары');
+            return false;
+        }
+
+        // Нормализация названий комнат
+        let normalizedRoomName = roomName;
+        if (roomName === '622a') normalizedRoomName = '622а';
+        if (roomName === '632a') normalizedRoomName = '632а';
+
+        const roomStatus = roomsStatus[normalizedRoomName];
+        if (!roomStatus || !Array.isArray(roomStatus)) {
+            return false;
+        }
+
+        return roomStatus.includes(pairToUse);
+    }
+
+    // Функция для обновления выбранной пары из свитчера
+    window.updateSelectedPair = function (pairNumber) {
+        console.log(`Обновление выбранной пары в map.js: ${pairNumber}`);
+        selectedPairFromSwitcher = pairNumber;
+        currentPair = pairNumber; // Также обновляем currentPair для совместимости
+        draw(); // Перерисовываем карту
+    }
+
+    // Функция для обновления выбранной даты
+    window.updateSelectedDate = async function (date) {
+        console.log(`Обновление выбранной даты в map.js: ${date}`);
+        currentDate = date;
+        const dateStr = formatDate(date);
+        const roomsDict = await window.fetchBusyRooms(dateStr);
+        window.updateRoomsStatus(roomsDict);
+        draw();
     }
 
     // Данные комнат
@@ -313,7 +349,7 @@ window.onload = function () {
             const hasPair = hasClassNow(room.name);
 
             if (hasPair) {
-                ctx.fillStyle = 'rgba(200, 100, 100, 0.6)';
+                ctx.fillStyle = 'rgba(128, 128, 128, 0.6)';
             } else {
                 ctx.fillStyle = 'rgba(76, 175, 80, 0.6)';
             }
@@ -487,22 +523,18 @@ window.onload = function () {
 
     async function initData() {
         const today = new Date();
-        const initialPair = getCurrentPair();
 
-        await window.loadRoomsData(today, initialPair);
+        // НЕ устанавливаем currentPair автоматически, 
+        // так как это делает timeSwitcher.js
+
+        // Загружаем данные для сегодняшней даты
+        await window.loadRoomsData(today, null);
 
         isDataLoaded = true;
         draw();
 
-        setInterval(async () => {
-            const newPair = getCurrentPair();
-            const now = new Date();
-
-            if (newPair !== currentPair) {
-                currentPair = newPair;
-                draw();
-            }
-        }, 60000);
+        // Убираем автообновление по времени, так как теперь пару выбирает пользователь
+        // setInterval для автообновления больше не нужен
     }
 
     canvas.style.cursor = 'grab';
@@ -510,8 +542,17 @@ window.onload = function () {
     initData();
 };
 
-function openRoomModal(roomName) {
-    console.log(`Открыто окно для комнаты ${roomName}`);
-    const isBusy = typeof hasClassNow !== 'undefined' ? hasClassNow(roomName) : false;
-    alert(`Комната ${roomName}\nСтатус: ${isBusy ? 'Занята' : 'Свободна'}`);
+// Функция получения текущей пары (для начальной инициализации)
+window.getCurrentPairNumber = function() {
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    if (currentTime >= 9 * 60 && currentTime < 10 * 60 + 30) return 1;
+    if (currentTime >= 10 * 60 + 40 && currentTime < 12 * 60 + 10) return 2;
+    if (currentTime >= 12 * 60 + 20 && currentTime < 13 * 60 + 50) return 3;
+    if (currentTime >= 14 * 60 + 30 && currentTime < 16 * 60) return 4;
+    if (currentTime >= 16 * 60 + 10 && currentTime < 17 * 60 + 40) return 5;
+    if (currentTime >= 17 * 60 + 50 && currentTime < 19 * 60 + 20) return 6;
+
+    return null;
 }
