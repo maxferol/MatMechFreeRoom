@@ -35,7 +35,6 @@ window.onload = function () {
         return null;
     }
 
-    // Функция форматирования даты
     // Функция форматирования даты (с учетом локального времени)
     function formatDate(date) {
         const year = date.getFullYear();
@@ -44,35 +43,7 @@ window.onload = function () {
         return `${year}-${month}-${day}`;
     }
 
-    // Функция сохранения данных в localStorage (вместо файла)
-    function saveRoomsToLocalStorage(roomsData, date) {
-        try {
-            const key = `rooms_${date}`;
-            localStorage.setItem(key, JSON.stringify(roomsData));
-            console.log(`Данные сохранены в localStorage под ключом: ${key}`);
-            return true;
-        } catch (error) {
-            console.error('Ошибка сохранения в localStorage:', error);
-            return false;
-        }
-    }
-
-    // Функция загрузки данных из localStorage
-    function loadRoomsFromLocalStorage(date) {
-        try {
-            const key = `rooms_${date}`;
-            const data = localStorage.getItem(key);
-            if (data) {
-                console.log(`Данные загружены из localStorage для ${date}`);
-                return JSON.parse(data);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки из localStorage:', error);
-        }
-        return null;
-    }
-
-    // Функция запроса к бэкенду
+    // Функция запроса к бэкенду (без кэширования)
     window.fetchBusyRooms = async function (date) {
         try {
             if (!window.fetch) {
@@ -80,14 +51,6 @@ window.onload = function () {
                 return {};
             }
 
-            // Сначала пробуем загрузить из localStorage
-            const cachedData = loadRoomsFromLocalStorage(date);
-            if (cachedData && Object.keys(cachedData).length > 0) {
-                console.log(`Использую кэшированные данные для ${date}`);
-                return cachedData;
-            }
-
-            // Если нет в кэше - запрашиваем с бэка
             const url = `http://localhost:5000/api/rooms/busy?date=${date}`;
             console.log(`Запрос к бэкенду для ${date}:`, url);
 
@@ -108,14 +71,7 @@ window.onload = function () {
 
             const data = await response.json();
             console.log(`Получены данные от бэкенда для ${date}:`, data);
-
-            // Сохраняем в localStorage
-            if (data && typeof data === 'object' && !Array.isArray(data)) {
-                saveRoomsToLocalStorage(data, date);
-                return data;
-            }
-
-            return {};
+            return data;
 
         } catch (error) {
             console.error('Ошибка получения занятых комнат:', error);
@@ -135,20 +91,18 @@ window.onload = function () {
         console.log(`Загрузка данных для даты: ${dateStr}, пары: ${pair}`);
 
         currentDate = date;
+        window.currentDate = date;
         currentPair = pair;
 
         const roomsDict = await window.fetchBusyRooms(dateStr);
         window.updateRoomsStatus(roomsDict);
-
         draw();
     };
 
-    // В начале map.js добавьте глобальные переменные
     let selectedPairFromSwitcher = null;
 
-    // Функция проверки, занята ли комната (использует выбранную пару)
+    // Функция проверки, занята ли комната
     function hasClassNow(roomName) {
-        // Используем выбранную пару из свитчера, если она есть
         let pairToUse = selectedPairFromSwitcher !== null ? selectedPairFromSwitcher : currentPair;
 
         if (!pairToUse) {
@@ -156,7 +110,6 @@ window.onload = function () {
             return false;
         }
 
-        // Нормализация названий комнат
         let normalizedRoomName = roomName;
         if (roomName === '622a') normalizedRoomName = '622а';
         if (roomName === '632a') normalizedRoomName = '632а';
@@ -169,25 +122,33 @@ window.onload = function () {
         return roomStatus.includes(pairToUse);
     }
 
-    // Функция для обновления выбранной пары из свитчера
-    // Функция для обновления выбранной пары из свитчера (БЕЗ запроса к бэкенду)
+    // Обновление выбранной пары (без запроса)
     window.updateSelectedPair = function (pairNumber) {
-        console.log(`Обновление выбранной пары в map.js: ${pairNumber}`);
+        console.log(`Обновление выбранной пары: ${pairNumber}`);
         selectedPairFromSwitcher = pairNumber;
         currentPair = pairNumber;
-        draw(); // Просто перерисовываем карту с новым фильтром
+        draw();
     }
 
-    // Функция для обновления выбранной даты (ТОЛЬКО при смене даты)
+    // Обновление выбранной даты (с запросом)
     window.updateSelectedDate = async function (date) {
-        console.log(`Обновление выбранной даты в map.js: ${date}`);
+        console.log(`Обновление выбранной даты: ${formatDate(date)}`);
         currentDate = date;
-        window.currentDate = date;  // Сохраняем глобально
+        window.currentDate = date;
         const dateStr = formatDate(date);
-
         const roomsDict = await window.fetchBusyRooms(dateStr);
         window.updateRoomsStatus(roomsDict);
         draw();
+    }
+
+    // Принудительное обновление (после бронирования)
+    window.refreshData = async function() {
+        if (currentDate) {
+            console.log(`Принудительное обновление для даты: ${formatDate(currentDate)}`);
+            const roomsDict = await window.fetchBusyRooms(formatDate(currentDate));
+            window.updateRoomsStatus(roomsDict);
+            draw();
+        }
     }
 
     // Данные комнат
@@ -380,10 +341,6 @@ window.onload = function () {
             ctx.fillStyle = '#000000';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-            ctx.shadowBlur = 3;
-            ctx.fillText(room.name, 0, 0);
-            ctx.shadowBlur = 0;
             ctx.fillText(room.name, 0, 0);
 
             ctx.restore();
@@ -421,7 +378,9 @@ window.onload = function () {
         for (let i = currentRooms.length - 1; i >= 0; i--) {
             const room = currentRooms[i];
             if (ctx.isPointInPath(room.path, coords.x, coords.y)) {
-                openBookingModal(room.name);
+                if (typeof window.openBookingModal === 'function') {
+                    window.openBookingModal(room.name);
+                }
                 return true;
             }
         }
@@ -530,18 +489,9 @@ window.onload = function () {
 
     async function initData() {
         const today = new Date();
-
-        // НЕ устанавливаем currentPair автоматически, 
-        // так как это делает timeSwitcher.js
-
-        // Загружаем данные для сегодняшней даты
         await window.loadRoomsData(today, null);
-
         isDataLoaded = true;
         draw();
-
-        // Убираем автообновление по времени, так как теперь пару выбирает пользователь
-        // setInterval для автообновления больше не нужен
     }
 
     canvas.style.cursor = 'grab';
@@ -549,7 +499,6 @@ window.onload = function () {
     initData();
 };
 
-// Функция получения текущей пары (для начальной инициализации)
 window.getCurrentPairNumber = function () {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();

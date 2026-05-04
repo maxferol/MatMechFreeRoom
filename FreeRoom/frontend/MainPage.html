@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline';">
     <link rel="stylesheet" href="MainPage.css">
 
     <title>MathMech Rooms</title>
@@ -100,7 +101,7 @@
             <div class="time-field">
                 <label>Пара:</label>
                 <div class="time-select">
-                    <select id="bookingTime">  
+                    <select id="bookingTime">
                         <option value="1">9:00 - 10:30</option>
                         <option value="2">10:40 - 12:10</option>
                         <option value="3">12:50 - 14:20</option>
@@ -141,6 +142,78 @@
         </div>
     </div>
 
+    <!-- Приветственное модальное окно -->
+    <div id="welcomeModal" class="modal welcome-modal">
+        <div class="modal-content welcome-content">
+            <div class="welcome-icon">
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <h2>Добро пожаловать в MathMech Rooms!</h2>
+            <p>Интерактивная карта аудиторий МатМеха Тургенева 4</p>
+
+            <div class="info-section">
+                <h3>📌 Как пользоваться:</h3>
+                <ul>
+                    <li><span class="color-box free"></span> <strong>Зеленые аудитории</strong> — свободны для
+                        бронирования</li>
+                    <li><span class="color-box busy"></span> <strong>Серые аудитории</strong> — заняты в выбранное время
+                    </li>
+                    <li>📅 Выбирайте <strong>дату и пару</strong> в панели управления</li>
+                    <li>🖱️ Нажмите на <strong>аудиторию</strong> на карте, чтобы забронировать</li>
+                    <li>🔐 <strong>Войдите в аккаунт</strong> для бронирования</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипт для приветственного окна -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Проверяем, показывали ли уже приветствие
+            const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+
+            if (!hasSeenWelcome) {
+                // Показываем приветственное окно через небольшую задержку
+                setTimeout(function () {
+                    const welcomeModal = document.getElementById('welcomeModal');
+                    if (welcomeModal) {
+                        welcomeModal.classList.add('show');
+                        document.body.style.overflow = 'hidden';
+                    }
+                }, 500);
+            }
+
+            // Обработчик закрытия
+            const closeWelcome = document.querySelector('.close-welcome');
+            const startBtn = document.getElementById('closeWelcomeBtn');
+
+            function closeWelcomeModal() {
+                const welcomeModal = document.getElementById('welcomeModal');
+                if (welcomeModal) {
+                    welcomeModal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                    // Сохраняем в localStorage, что приветствие было показано
+                    localStorage.setItem('hasSeenWelcome', 'true');
+                }
+            }
+
+            if (closeWelcome) {
+                closeWelcome.addEventListener('click', closeWelcomeModal);
+            }
+
+            if (startBtn) {
+                startBtn.addEventListener('click', closeWelcomeModal);
+            }
+
+            // Закрытие по клику вне окна
+            window.addEventListener('click', function (event) {
+                const welcomeModal = document.getElementById('welcomeModal');
+                if (event.target === welcomeModal) {
+                    closeWelcomeModal();
+                }
+            });
+        });
+    </script>
     <script src="map.js" defer></script>
     <script src="time.js" defer></script>
     <script src="timeSwitcher.js" defer></script>
