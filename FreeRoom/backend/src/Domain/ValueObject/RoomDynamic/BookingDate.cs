@@ -1,18 +1,20 @@
 ﻿public class BookingDate
 {
-    private static DateTime MinDateBooking => DateTime.UtcNow.Date; 
-    private static DateTime MaxDateBooking => MinDateBooking.AddDays(7);
-
-    public DateTime Value { get; }
+    public DateTime Value { get; private set; }
 
     public BookingDate(DateTime value)
     {
-        var dateToCheck = value.ToUniversalTime().Date;
-
-        if (dateToCheck < MinDateBooking || dateToCheck > MaxDateBooking)
-            throw new ArgumentOutOfRangeException(nameof(value), 
-                $"Время бронирования {dateToCheck} не попадает в диапазон: [{MinDateBooking}, {MaxDateBooking}]");
-        
-        Value = dateToCheck;
+        // Принимаем любую дату, просто сохраняем ее как DateTimeKind.Local
+        if (value.Kind == DateTimeKind.Utc)
+        {
+            // Если пришла UTC, конвертируем в локальную
+            Value = value.ToLocalTime().Date;
+        }
+        else
+        {
+            Value = value.Date;
+        }
     }
+    
+    public override string ToString() => Value.ToString("yyyy-MM-dd");
 }

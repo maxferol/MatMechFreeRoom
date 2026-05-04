@@ -228,29 +228,75 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     }
 
     public async Task<List<RoomDynamic>> GetAll()
+{
+    var result = new List<RoomDynamic>();
+    try
     {
-        var result = new List<RoomDynamic>();
-        try
+        var documents = await CollectionRoomDynamic.Find(new BsonDocument()).ToListAsync();
+        Console.WriteLine($"GetAll: найдено {documents.Count} документов в MongoDB");
+        
+        foreach (var doc in documents)
         {
-            var documents = await CollectionRoomDynamic.Find(new BsonDocument()).ToListAsync();
-            foreach (var doc in documents)
+            try
             {
+                // Проверяем наличие всех необходимых полей
+                if (!doc.Contains("roomStaticId") || !doc.Contains("userId") || 
+                    !doc.Contains("lessonNumber") || !doc.Contains("bookingDate"))
+                {
+                    Console.WriteLine($"Пропуск документа {doc.GetValue("_id", "unknown")}: отсутствуют обязательные поля");
+                    continue;
+                }
+                
+                var roomStaticId = new RoomStaticId(doc["roomStaticId"].AsString);
+                var userId = new UserId(Guid.Parse(doc["userId"].AsString));
+                var lessonNumber = new LessonNumber(doc["lessonNumber"].AsInt32);
+                
+                // Обрабатываем дату с защитой от ошибок
+                DateTime bookingDateValue;
                 try
                 {
-                    result.Add(MapToRoomDynamic(doc));
+                    bookingDateValue = doc["bookingDate"].ToUniversalTime();
+                    
+                    // Дополнительная проверка: если дата слишком старая или слишком новая, пропускаем
+                    if (bookingDateValue.Year < 2020 || bookingDateValue.Year > 2030)
+                    {
+                        Console.WriteLine($"Пропуск документа {doc.GetValue("_id", "unknown")}: дата {bookingDateValue} вне допустимого диапазона");
+                        continue;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Ошибка маппинга документа {doc.GetValue("_id", "unknown")}: {ex.Message}");
+                    Console.WriteLine($"Ошибка при чтении даты: {ex.Message}");
+                    continue;
                 }
+                
+                var bookingDate = new BookingDate(bookingDateValue);
+                
+                var roomDynamic = new RoomDynamic(roomStaticId, userId, lessonNumber, bookingDate);
+                
+                // Устанавливаем Id
+                if (doc.Contains("roomDynamicId"))
+                {
+                    var idProperty = typeof(RoomDynamic).GetProperty("Id");
+                    var idValue = new RoomDynamicId(Guid.Parse(doc["roomDynamicId"].AsString));
+                    idProperty?.SetValue(roomDynamic, idValue);
+                }
+                
+                result.Add(roomDynamic);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка маппинга документа {doc.GetValue("_id", "unknown")}: {ex.Message}");
+                // Продолжаем с следующим документом
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при получении всех аудиторий: {ex.Message}");
-        }
-        return result;
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Ошибка при получении всех аудиторий: {ex.Message}");
+    }
+    return result;
+}
 
     // public async Task<List<RoomDynamic>> SearchAsync(string searchText)
     // {
