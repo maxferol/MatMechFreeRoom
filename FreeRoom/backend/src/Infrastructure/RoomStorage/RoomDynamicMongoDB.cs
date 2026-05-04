@@ -12,16 +12,17 @@ namespace FreeRoom.backend.src.Infrastructure.RoomStorage;
 public class RoomDynamicMongoDB : IRoomDynamicRepository
 {
     private readonly IMongoCollection<BsonDocument> CollectionRoomDynamic;
+
     public RoomDynamicMongoDB(string connectionString, string databaseName)
     {
         var client = new MongoClient(connectionString);
         var database = client.GetDatabase(databaseName);
         CollectionRoomDynamic = database.GetCollection<BsonDocument>("RoomDynamics");
         Console.WriteLine($"MongoDB подключен: {databaseName}");
-        
+
         //CreateIndexes();
     }
-    
+
     //public async Task<RoomDynamic> CreateMaterial(RoomDynamic material)
     // private void CreateIndexes()
     // {
@@ -60,13 +61,21 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         {
             if (roomDynamic == null)
                 throw new ArgumentNullException(nameof(roomDynamic), "RoomDynamic не должен быть null");
-            
-            Console.WriteLine($"CreateRoomDynamic: checking if exists...");
-        
-            // Проверяем существование без создания нового объекта
+
+            Console.WriteLine($"CreateRoomDynamic: saving booking...");
+            Console.WriteLine($"Исходная дата: {roomDynamic.BookingDate.Value}");
+
+            // Нормализуем дату - берем только дату без времени и указываем Kind как Unspecified
+            var normalizedDate = roomDynamic.BookingDate.Value.Date;
+            var dateForSave = new DateTime(normalizedDate.Year, normalizedDate.Month, normalizedDate.Day, 0, 0, 0,
+                DateTimeKind.Unspecified);
+
+            Console.WriteLine($"Дата для сохранения: {dateForSave}");
+
+            // Проверяем существование
             var filterBuilder = Builders<BsonDocument>.Filter;
             var filter = filterBuilder.And(
-                filterBuilder.Eq("bookingDate", roomDynamic.BookingDate.Value.ToUniversalTime().Date),
+                filterBuilder.Eq("bookingDate", dateForSave),
                 filterBuilder.Eq("roomStaticId", roomDynamic.RoomStaticId.Value.ToString()),
                 filterBuilder.Eq("lessonNumber", roomDynamic.LessonNumber.Value)
             );
@@ -84,11 +93,11 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
                 { "roomStaticId", roomDynamic.RoomStaticId.Value.ToString() },
                 { "userId", roomDynamic.UserId.Value.ToString() },
                 { "lessonNumber", roomDynamic.LessonNumber.Value },
-                { "bookingDate", roomDynamic.BookingDate.Value.ToUniversalTime() }
+                { "bookingDate", dateForSave } // Сохраняем как есть, без ToUniversalTime
             };
-        
+
             await CollectionRoomDynamic.InsertOneAsync(bsonDocument);
-            Console.WriteLine($"Аудитория сохранена в MongoDB!");
+            Console.WriteLine($"Аудитория сохранена в MongoDB с датой {dateForSave}");
             return roomDynamic;
         }
         catch (Exception ex)
@@ -103,13 +112,19 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     {
         try
         {
+            // Нормализуем дату для поиска
+            var searchDate = date.Date;
+            Console.WriteLine($"GetByUserAndDate: поиск для {login}, дата {searchDate}");
+
             var filterBuilder = Builders<BsonDocument>.Filter;
             var filter = filterBuilder.And(
                 filterBuilder.Eq("userId", login),
-                filterBuilder.Eq("bookingDate", date.ToUniversalTime().Date)
+                filterBuilder.Eq("bookingDate", searchDate)
             );
 
             var documents = await CollectionRoomDynamic.Find(filter).ToListAsync();
+            Console.WriteLine($"Найдено {documents.Count} документов");
+
             return documents.Select(MapToRoomDynamic).ToList();
         }
         catch (Exception ex)
@@ -136,54 +151,55 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     }
 
     public async Task<RoomDynamic?> GetByEqualsRoom(RoomDynamic roomDynamic)
-{
-    try
     {
-        Console.WriteLine($"GetByEqualsRoom: checking for room {roomDynamic.RoomStaticId?.Value}, lesson {roomDynamic.LessonNumber?.Value}, date {roomDynamic.BookingDate?.Value}");
-        
-        // Используем прямое сравнение без создания нового объекта через рефлексию
-        var filterBuilder = Builders<BsonDocument>.Filter;
-        var filter = filterBuilder.And(
-            filterBuilder.Eq("bookingDate", roomDynamic.BookingDate.Value.ToUniversalTime().Date),
-            filterBuilder.Eq("roomStaticId", roomDynamic.RoomStaticId.Value.ToString()),
-            filterBuilder.Eq("lessonNumber", roomDynamic.LessonNumber.Value)
-        );
-
-        var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
-        if (document == null)
+        try
         {
-            Console.WriteLine("GetByEqualsRoom: no existing booking found");
+            Console.WriteLine(
+                $"GetByEqualsRoom: checking for room {roomDynamic.RoomStaticId?.Value}, lesson {roomDynamic.LessonNumber?.Value}, date {roomDynamic.BookingDate?.Value}");
+
+            // Используем прямое сравнение без создания нового объекта через рефлексию
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq("bookingDate", roomDynamic.BookingDate.Value.ToUniversalTime().Date),
+                filterBuilder.Eq("roomStaticId", roomDynamic.RoomStaticId.Value.ToString()),
+                filterBuilder.Eq("lessonNumber", roomDynamic.LessonNumber.Value)
+            );
+
+            var document = await CollectionRoomDynamic.Find(filter).FirstOrDefaultAsync();
+            if (document == null)
+            {
+                Console.WriteLine("GetByEqualsRoom: no existing booking found");
+                return null;
+            }
+
+            Console.WriteLine("GetByEqualsRoom: existing booking found");
+
+            // Создаем объект напрямую, без MapToRoomDynamic
+            var roomStaticId = new RoomStaticId(document["roomStaticId"].AsString);
+            var userId = new UserId(Guid.Parse(document["userId"].AsString));
+            var lessonNumber = new LessonNumber(document["lessonNumber"].AsInt32);
+            var bookingDate = new BookingDate(document["bookingDate"].ToUniversalTime());
+
+            var existingBooking = new RoomDynamic(roomStaticId, userId, lessonNumber, bookingDate);
+
+            // Устанавливаем Id
+            if (document.Contains("roomDynamicId"))
+            {
+                var idProperty = typeof(RoomDynamic).GetProperty("Id");
+                var idValue = new RoomDynamicId(Guid.Parse(document["roomDynamicId"].AsString));
+                idProperty?.SetValue(existingBooking, idValue);
+            }
+
+            return existingBooking;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при получении аудитории: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return null;
         }
-        
-        Console.WriteLine("GetByEqualsRoom: existing booking found");
-        
-        // Создаем объект напрямую, без MapToRoomDynamic
-        var roomStaticId = new RoomStaticId(document["roomStaticId"].AsString);
-        var userId = new UserId(Guid.Parse(document["userId"].AsString));
-        var lessonNumber = new LessonNumber(document["lessonNumber"].AsInt32);
-        var bookingDate = new BookingDate(document["bookingDate"].ToUniversalTime());
-        
-        var existingBooking = new RoomDynamic(roomStaticId, userId, lessonNumber, bookingDate);
-        
-        // Устанавливаем Id
-        if (document.Contains("roomDynamicId"))
-        {
-            var idProperty = typeof(RoomDynamic).GetProperty("Id");
-            var idValue = new RoomDynamicId(Guid.Parse(document["roomDynamicId"].AsString));
-            idProperty?.SetValue(existingBooking, idValue);
-        }
-        
-        return existingBooking;
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Ошибка при получении аудитории: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-        return null;
-    }
-}
-    
+
     public async Task<RoomDynamic?> GetByNumberRoomDynamic(string RoomDynamicNumber)
     {
         try
@@ -228,75 +244,78 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
     }
 
     public async Task<List<RoomDynamic>> GetAll()
-{
-    var result = new List<RoomDynamic>();
-    try
     {
-        var documents = await CollectionRoomDynamic.Find(new BsonDocument()).ToListAsync();
-        Console.WriteLine($"GetAll: найдено {documents.Count} документов в MongoDB");
-        
-        foreach (var doc in documents)
+        var result = new List<RoomDynamic>();
+        try
         {
-            try
+            var documents = await CollectionRoomDynamic.Find(new BsonDocument()).ToListAsync();
+            Console.WriteLine($"GetAll: найдено {documents.Count} документов в MongoDB");
+
+            foreach (var doc in documents)
             {
-                // Проверяем наличие всех необходимых полей
-                if (!doc.Contains("roomStaticId") || !doc.Contains("userId") || 
-                    !doc.Contains("lessonNumber") || !doc.Contains("bookingDate"))
-                {
-                    Console.WriteLine($"Пропуск документа {doc.GetValue("_id", "unknown")}: отсутствуют обязательные поля");
-                    continue;
-                }
-                
-                var roomStaticId = new RoomStaticId(doc["roomStaticId"].AsString);
-                var userId = new UserId(Guid.Parse(doc["userId"].AsString));
-                var lessonNumber = new LessonNumber(doc["lessonNumber"].AsInt32);
-                
-                // Обрабатываем дату с защитой от ошибок
-                DateTime bookingDateValue;
                 try
                 {
-                    bookingDateValue = doc["bookingDate"].ToUniversalTime();
-                    
-                    // Дополнительная проверка: если дата слишком старая или слишком новая, пропускаем
-                    if (bookingDateValue.Year < 2020 || bookingDateValue.Year > 2030)
+                    // Проверяем наличие всех необходимых полей
+                    if (!doc.Contains("roomStaticId") || !doc.Contains("userId") ||
+                        !doc.Contains("lessonNumber") || !doc.Contains("bookingDate"))
                     {
-                        Console.WriteLine($"Пропуск документа {doc.GetValue("_id", "unknown")}: дата {bookingDateValue} вне допустимого диапазона");
+                        Console.WriteLine(
+                            $"Пропуск документа {doc.GetValue("_id", "unknown")}: отсутствуют обязательные поля");
                         continue;
                     }
+
+                    var roomStaticId = new RoomStaticId(doc["roomStaticId"].AsString);
+                    var userId = new UserId(Guid.Parse(doc["userId"].AsString));
+                    var lessonNumber = new LessonNumber(doc["lessonNumber"].AsInt32);
+
+                    // Обрабатываем дату с защитой от ошибок
+                    DateTime bookingDateValue;
+                    try
+                    {
+                        bookingDateValue = doc["bookingDate"].ToUniversalTime();
+
+                        // Дополнительная проверка: если дата слишком старая или слишком новая, пропускаем
+                        if (bookingDateValue.Year < 2020 || bookingDateValue.Year > 2030)
+                        {
+                            Console.WriteLine(
+                                $"Пропуск документа {doc.GetValue("_id", "unknown")}: дата {bookingDateValue} вне допустимого диапазона");
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ошибка при чтении даты: {ex.Message}");
+                        continue;
+                    }
+
+                    var bookingDate = new BookingDate(bookingDateValue);
+
+                    var roomDynamic = new RoomDynamic(roomStaticId, userId, lessonNumber, bookingDate);
+
+                    // Устанавливаем Id
+                    if (doc.Contains("roomDynamicId"))
+                    {
+                        var idProperty = typeof(RoomDynamic).GetProperty("Id");
+                        var idValue = new RoomDynamicId(Guid.Parse(doc["roomDynamicId"].AsString));
+                        idProperty?.SetValue(roomDynamic, idValue);
+                    }
+
+                    result.Add(roomDynamic);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Ошибка при чтении даты: {ex.Message}");
-                    continue;
+                    Console.WriteLine($"Ошибка маппинга документа {doc.GetValue("_id", "unknown")}: {ex.Message}");
+                    // Продолжаем с следующим документом
                 }
-                
-                var bookingDate = new BookingDate(bookingDateValue);
-                
-                var roomDynamic = new RoomDynamic(roomStaticId, userId, lessonNumber, bookingDate);
-                
-                // Устанавливаем Id
-                if (doc.Contains("roomDynamicId"))
-                {
-                    var idProperty = typeof(RoomDynamic).GetProperty("Id");
-                    var idValue = new RoomDynamicId(Guid.Parse(doc["roomDynamicId"].AsString));
-                    idProperty?.SetValue(roomDynamic, idValue);
-                }
-                
-                result.Add(roomDynamic);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка маппинга документа {doc.GetValue("_id", "unknown")}: {ex.Message}");
-                // Продолжаем с следующим документом
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при получении всех аудиторий: {ex.Message}");
+        }
+
+        return result;
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Ошибка при получении всех аудиторий: {ex.Message}");
-    }
-    return result;
-}
 
     // public async Task<List<RoomDynamic>> SearchAsync(string searchText)
     // {
@@ -350,15 +369,16 @@ public class RoomDynamicMongoDB : IRoomDynamicRepository
         try
         {
             Console.WriteLine($"MapToRoomDynamic: starting mapping for document");
-        
+
             // 1. Создаем необходимые Value Objects из документа
             var roomStaticId = new RoomStaticId(document["roomStaticId"].AsString);
             var userId = new UserId(Guid.Parse(document["userId"].AsString));
             var lessonNumber = new LessonNumber(document["lessonNumber"].AsInt32);
             var bookingDate = new BookingDate(document["bookingDate"].ToUniversalTime());
 
-            Console.WriteLine($"MapToRoomDynamic: created Value Objects - roomStaticId={roomStaticId.Value}, userId={userId.Value}, lessonNumber={lessonNumber.Value}, bookingDate={bookingDate.Value}");
-        
+            Console.WriteLine(
+                $"MapToRoomDynamic: created Value Objects - roomStaticId={roomStaticId.Value}, userId={userId.Value}, lessonNumber={lessonNumber.Value}, bookingDate={bookingDate.Value}");
+
             // 2. Используем публичный конструктор напрямую (без рефлексии)
             var roomDynamic = new RoomDynamic(roomStaticId, userId, lessonNumber, bookingDate);
 
