@@ -11,7 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 // Параметры БД
-var connectionString = "mongodb://localhost:27017";
+var connectionString = "mongodb+srv://pashathelooser:looserpassword@cluster0.wliy5xk.mongodb.net/?appName=Cluster0";
 var databaseName = "FreeRoom";
 
 // 2. Регистрация репозиториев
@@ -57,10 +57,33 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.MapGet("/admin/load-schedule", async () =>
+{
+    try
+    {
+        
+        var databaseName = "FreeRoom";
+        
+        var parser = new ScheduleParser(connectionString, databaseName);
+        string scheduleJsonPath = Path.Combine(Directory.GetCurrentDirectory(), "schedule_week.json");
+        
+        if (!File.Exists(scheduleJsonPath))
+        {
+            return Results.NotFound("Файл schedule_week.json не найден");
+        }
+        
+        await parser.LoadScheduleFromJsonFile(scheduleJsonPath);
+        return Results.Ok("Расписание успешно загружено в MongoDB Atlas!");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Ошибка: {ex.Message}");
+    }
+});
+
 app.MapControllers();
 
-Console.WriteLine("Сервер запущен на http://localhost:5000");
-//
+
 // try
 // {
 //     var parser = new ScheduleParser(connectionString, databaseName);

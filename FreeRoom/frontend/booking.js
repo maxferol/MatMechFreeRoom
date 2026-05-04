@@ -1,6 +1,6 @@
 // booking.js - функционал бронирования аудиторий
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://freeroom-backend.onrender.com/api';
 
 let currentBookingRoom = null;
 

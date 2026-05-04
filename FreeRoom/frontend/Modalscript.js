@@ -33,7 +33,6 @@ function handleEscapeKey(event) {
     }
 }
 
-
 // Назначаем обработчики
 if (openModalBtn) openModalBtn.addEventListener('click', openModal);
 if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -106,6 +105,25 @@ if (makeBronBtn) {
 // Закрытие модального окна комнаты по крестику
 const roomCloseBtn = document.querySelector('#myModalRoom .close');
 if (roomCloseBtn) roomCloseBtn.addEventListener('click', closeRoomModal);
+
+// МОБИЛЬНЫЕ КНОПКИ ЗАКРЫТИЯ
+function addMobileCloseButtons() {
+    const modals = ['myModalRoom', 'scheduleModal'];
+    
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal && !modal.querySelector('.close-mobile')) {
+            const mobileCloseBtn = document.createElement('button');
+            mobileCloseBtn.className = 'close-mobile';
+            mobileCloseBtn.innerHTML = '<i class="fas fa-times"></i>';
+            mobileCloseBtn.onclick = () => {
+                if (modalId === 'myModalRoom') closeRoomModal();
+                if (modalId === 'scheduleModal') closeScheduleModal();
+            };
+            modal.querySelector('.modal-content')?.appendChild(mobileCloseBtn);
+        }
+    });
+}
 
 // Закрытие по клику вне окна комнаты
 window.addEventListener('click', (event) => {
@@ -208,7 +226,7 @@ async function openScheduleModal(roomName) {
     if (scheduleTitle) scheduleTitle.textContent = `Расписание кабинета ${roomName}`;
     if (scheduleModal) scheduleModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
-    
+    addMobileCloseButtons();
     await loadScheduleForToday(roomName);
 }
 
@@ -227,6 +245,7 @@ function initScheduleModal() {
 // Добавляем обработчик для кнопки "Смотреть расписание"
 document.addEventListener('DOMContentLoaded', () => {
     initScheduleModal();
+    addMobileCloseButtons();
     
     // Назначаем обработчик на кнопку просмотра расписания
     const observer = new MutationObserver(() => {
@@ -239,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+        addMobileCloseButtons();
     });
     
     observer.observe(document.body, { childList: true, subtree: true });

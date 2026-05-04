@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Content-Security-Policy"
         content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline';">
     <link rel="stylesheet" href="MainPage.css">
@@ -30,12 +30,10 @@
                     <a href="Login.html" class="login-btn">Вход</a>
                     <a href="Registration.html" class="register-btn">Регистрация</a>
                 </div>
-                <div class="guest-link">
-                    <a href="http://192.168.1.45:8080/frontend/MainPage.html" class="guest-btn">Продолжить как гость</a>
-                </div>
             </div>
         </div>
-        <a class="menuTime">MatmechMaps |&nbsp;
+        <a class="menuTime">
+            <span>MatmechMaps |&nbsp;</span>
             <div id="current-schedule"> Загрузка...</div>
         </a>
         <button class="search-button">
@@ -145,9 +143,6 @@
     <!-- Приветственное модальное окно -->
     <div id="welcomeModal" class="modal welcome-modal">
         <div class="modal-content welcome-content">
-            <div class="welcome-icon">
-                <i class="fas fa-map-marked-alt"></i>
-            </div>
             <h2>Добро пожаловать в MathMech Rooms!</h2>
             <p>Интерактивная карта аудиторий МатМеха Тургенева 4</p>
 
@@ -163,6 +158,8 @@
                     <li>🔐 <strong>Войдите в аккаунт</strong> для бронирования</li>
                 </ul>
             </div>
+
+            <button id="closeWelcomeBtn" class="welcome-start-btn">Начать работу</button>
         </div>
     </div>
 

@@ -20,6 +20,19 @@ window.onload = function () {
     let currentFloor = 6;
     let currentRooms = [];
 
+    // Флаг для определения мобильного устройства
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // Для мобильных устройств увеличиваем чувствительность
+    const MOBILE_DRAG_THRESHOLD = 3;
+    const DESKTOP_DRAG_THRESHOLD = 5;
+    const dragThreshold = isMobile ? MOBILE_DRAG_THRESHOLD : DESKTOP_DRAG_THRESHOLD;
+
+    // Для мобильных устройств отключаем стандартные жесты
+    if (isMobile) {
+        canvas.style.touchAction = 'none';
+    }
+
     // Функция получения текущей пары
     function getCurrentPair() {
         const now = new Date();
@@ -51,11 +64,11 @@ window.onload = function () {
                 return {};
             }
 
-            const url = `http://localhost:5000/api/rooms/busy?date=${date}`;
+            const url = `https://freeroom-backend.onrender.com/api/rooms/busy?date=${date}`;
             console.log(`Запрос к бэкенду для ${date}:`, url);
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
 
             const response = await fetch(url, {
                 signal: controller.signal,
@@ -142,7 +155,7 @@ window.onload = function () {
     }
 
     // Принудительное обновление (после бронирования)
-    window.refreshData = async function() {
+    window.refreshData = async function () {
         if (currentDate) {
             console.log(`Принудительное обновление для даты: ${formatDate(currentDate)}`);
             const roomsDict = await window.fetchBusyRooms(formatDate(currentDate));
@@ -411,13 +424,18 @@ window.onload = function () {
         if (isDragging) {
             const dx = e.clientX - dragStartX;
             const dy = e.clientY - dragStartY;
-            if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
+            if (Math.abs(dx) < dragThreshold && Math.abs(dy) < dragThreshold) {
                 checkRoomClick(e);
             }
         }
         isDragging = false;
         canvas.style.cursor = 'grab';
     });
+
+    // Улучшенная обработка тач-событий для мобильных
+    let touchStartDistance = 0;
+    let touchStartScale = 1;
+    let isPinching = false;
 
     canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
@@ -450,26 +468,75 @@ window.onload = function () {
 
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        isTouching = true;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        touchLastX = offsetX;
-        touchLastY = offsetY;
+
+        if (e.touches.length === 2) {
+            // Масштабирование двумя пальцами
+            isPinching = true;
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+            touchStartScale = scale;
+        } else if (e.touches.length === 1) {
+            // Перетаскивание одним пальцем
+            isDragging = true;
+            isPinching = false;
+            dragStartX = e.touches[0].clientX;
+            dragStartY = e.touches[0].clientY;
+            lastX = offsetX;
+            lastY = offsetY;
+        }
     });
 
     canvas.addEventListener('touchmove', (e) => {
-        if (!isTouching) return;
         e.preventDefault();
-        const dx = e.touches[0].clientX - touchStartX;
-        const dy = e.touches[0].clientY - touchStartY;
-        offsetX = touchLastX + dx;
-        offsetY = touchLastY + dy;
-        clampOffset();
-        draw();
+
+        if (isPinching && e.touches.length === 2) {
+            // Масштабирование
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const newScale = touchStartScale * (distance / touchStartDistance);
+
+            if (newScale > 0.3 && newScale < 5) {
+                const rect = canvas.getBoundingClientRect();
+                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasCenterX = centerX * scaleX;
+                const canvasCenterY = centerY * scaleY;
+                const beforeX = (canvasCenterX - offsetX) / scale;
+                const beforeY = (canvasCenterY - offsetY) / scale;
+                scale = newScale;
+                const afterX = (canvasCenterX - offsetX) / scale;
+                const afterY = (canvasCenterY - offsetY) / scale;
+                offsetX += (afterX - beforeX) * scale;
+                offsetY += (afterY - beforeY) * scale;
+                clampOffset();
+                draw();
+            }
+        } else if (isDragging && e.touches.length === 1) {
+            // Перетаскивание
+            const dx = e.touches[0].clientX - dragStartX;
+            const dy = e.touches[0].clientY - dragStartY;
+            offsetX = lastX + dx;
+            offsetY = lastY + dy;
+            clampOffset();
+            draw();
+        }
     });
 
     canvas.addEventListener('touchend', (e) => {
-        isTouching = false;
+        if (isDragging && !isPinching && e.touches.length === 0) {
+            // Проверяем, был ли клик (небольшое перемещение)
+            if (Math.abs(e.changedTouches[0].clientX - dragStartX) < dragThreshold &&
+                Math.abs(e.changedTouches[0].clientY - dragStartY) < dragThreshold) {
+                const fakeEvent = { clientX: dragStartX, clientY: dragStartY };
+                checkRoomClick(fakeEvent);
+            }
+        }
+        isDragging = false;
+        isPinching = false;
     });
 
     function switchFloor(floor) {
