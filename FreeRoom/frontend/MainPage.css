@@ -1319,3 +1319,16 @@ button:active {
         margin: 6px 0;
     }
 }
+
+/* Убираем лишнюю белую полосу справа */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
