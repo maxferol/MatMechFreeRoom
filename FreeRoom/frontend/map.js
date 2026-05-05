@@ -271,20 +271,28 @@ window.onload = function () {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         if (isMobile) {
-            // На мобильных устройствах используем CSS размеры, а не физические
             const container = canvas.parentElement;
             if (container) {
                 const containerRect = container.getBoundingClientRect();
+
+                // Получаем pixel ratio для retina-экранов
+                const pixelRatio = window.devicePixelRatio || 1;
+
+                // Устанавливаем CSS размеры
                 canvas.style.width = containerRect.width + 'px';
                 canvas.style.height = containerRect.height + 'px';
 
-                // Устанавливаем физические размеры canvas равными CSS размерам
-                canvas.width = containerRect.width;
-                canvas.height = containerRect.height;
+                // Устанавливаем физические размеры canvas УМНОЖЕННЫЕ на pixelRatio для качества
+                canvas.width = containerRect.width * pixelRatio;
+                canvas.height = containerRect.height * pixelRatio;
+
+                // Масштабируем контекст для корректной отрисовки
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(pixelRatio, pixelRatio);
 
                 // Рассчитываем масштаб для отрисовки карты
-                const scaleX = canvas.width / currentMapImage.width;
-                const scaleY = canvas.height / currentMapImage.height;
+                const scaleX = (containerRect.width) / currentMapImage.width;
+                const scaleY = (containerRect.height) / currentMapImage.height;
                 scale = Math.min(scaleX, scaleY, 1.5);
             }
         } else {
