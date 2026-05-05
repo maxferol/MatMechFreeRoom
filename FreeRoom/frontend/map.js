@@ -268,10 +268,33 @@ window.onload = function () {
     }
 
     function resizeCanvas() {
-        canvas.width = currentMapImage.width;
-        canvas.height = currentMapImage.height;
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            // На мобильных устройствах используем CSS размеры, а не физические
+            const container = canvas.parentElement;
+            if (container) {
+                const containerRect = container.getBoundingClientRect();
+                canvas.style.width = containerRect.width + 'px';
+                canvas.style.height = containerRect.height + 'px';
+
+                // Устанавливаем физические размеры canvas равными CSS размерам
+                canvas.width = containerRect.width;
+                canvas.height = containerRect.height;
+
+                // Рассчитываем масштаб для отрисовки карты
+                const scaleX = canvas.width / currentMapImage.width;
+                const scaleY = canvas.height / currentMapImage.height;
+                scale = Math.min(scaleX, scaleY, 1.5);
+            }
+        } else {
+            canvas.width = currentMapImage.width;
+            canvas.height = currentMapImage.height;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            scale = 1;
+        }
+
         centerMap();
     }
 
@@ -296,6 +319,7 @@ window.onload = function () {
         let maxX = 0;
         let maxY = 0;
 
+        // Если карта меньше canvas, центрируем её
         if (mapWidth < canvasWidth) {
             minX = (canvasWidth - mapWidth) / 2;
             maxX = minX;
@@ -365,8 +389,6 @@ window.onload = function () {
 
     function getCanvasCoords(e) {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
 
         let clientX, clientY;
         if (e.touches) {
@@ -377,12 +399,19 @@ window.onload = function () {
             clientY = e.clientY;
         }
 
-        let canvasX = (clientX - rect.left) * scaleX;
-        let canvasY = (clientY - rect.top) * scaleY;
-        canvasX = (canvasX - offsetX) / scale;
-        canvasY = (canvasY - offsetY) / scale;
+        // Координаты относительно canvas в пикселях CSS
+        const cssX = clientX - rect.left;
+        const cssY = clientY - rect.top;
 
-        return { x: canvasX, y: canvasY };
+        // Преобразуем в координаты физического canvas
+        const physicalX = (cssX / rect.width) * canvas.width;
+        const physicalY = (cssY / rect.height) * canvas.height;
+
+        // Преобразуем в координаты карты
+        const mapX = (physicalX - offsetX) / scale;
+        const mapY = (physicalY - offsetY) / scale;
+
+        return { x: mapX, y: mapY };
     }
 
     function checkRoomClick(e) {
@@ -472,6 +501,7 @@ window.onload = function () {
         if (e.touches.length === 2) {
             // Масштабирование двумя пальцами
             isPinching = true;
+            isDragging = false;
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
             touchStartDistance = Math.sqrt(dx * dx + dy * dy);
@@ -495,42 +525,51 @@ window.onload = function () {
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            const newScale = touchStartScale * (distance / touchStartDistance);
+            let newScale = touchStartScale * (distance / touchStartDistance);
+            newScale = Math.min(5, Math.max(0.3, newScale));
 
-            if (newScale > 0.3 && newScale < 5) {
+            if (newScale !== scale) {
                 const rect = canvas.getBoundingClientRect();
                 const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
                 const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const canvasCenterX = centerX * scaleX;
-                const canvasCenterY = centerY * scaleY;
-                const beforeX = (canvasCenterX - offsetX) / scale;
-                const beforeY = (canvasCenterY - offsetY) / scale;
+
+                // Преобразуем CSS координаты в физические
+                const physicalCenterX = (centerX / rect.width) * canvas.width;
+                const physicalCenterY = (centerY / rect.height) * canvas.height;
+
+                const beforeX = (physicalCenterX - offsetX) / scale;
+                const beforeY = (physicalCenterY - offsetY) / scale;
                 scale = newScale;
-                const afterX = (canvasCenterX - offsetX) / scale;
-                const afterY = (canvasCenterY - offsetY) / scale;
+                const afterX = (physicalCenterX - offsetX) / scale;
+                const afterY = (physicalCenterY - offsetY) / scale;
                 offsetX += (afterX - beforeX) * scale;
                 offsetY += (afterY - beforeY) * scale;
                 clampOffset();
                 draw();
             }
         } else if (isDragging && e.touches.length === 1) {
-            // Перетаскивание
-            const dx = e.touches[0].clientX - dragStartX;
-            const dy = e.touches[0].clientY - dragStartY;
-            offsetX = lastX + dx;
-            offsetY = lastY + dy;
+            // Перетаскивание - преобразуем движение в физические пиксели
+            const rect = canvas.getBoundingClientRect();
+            const cssDx = e.touches[0].clientX - dragStartX;
+            const cssDy = e.touches[0].clientY - dragStartY;
+
+            // Преобразуем CSS смещение в физические пиксели canvas
+            const physicalDx = (cssDx / rect.width) * canvas.width;
+            const physicalDy = (cssDy / rect.height) * canvas.height;
+
+            offsetX = lastX + physicalDx;
+            offsetY = lastY + physicalDy;
             clampOffset();
             draw();
         }
     });
 
     canvas.addEventListener('touchend', (e) => {
-        if (isDragging && !isPinching && e.touches.length === 0) {
+        if (isDragging && !isPinching) {
             // Проверяем, был ли клик (небольшое перемещение)
-            if (Math.abs(e.changedTouches[0].clientX - dragStartX) < dragThreshold &&
-                Math.abs(e.changedTouches[0].clientY - dragStartY) < dragThreshold) {
+            const dx = Math.abs(e.changedTouches[0].clientX - dragStartX);
+            const dy = Math.abs(e.changedTouches[0].clientY - dragStartY);
+            if (dx < dragThreshold && dy < dragThreshold) {
                 const fakeEvent = { clientX: dragStartX, clientY: dragStartY };
                 checkRoomClick(fakeEvent);
             }
