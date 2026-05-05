@@ -267,43 +267,36 @@ window.onload = function () {
         });
     }
 
-    function resizeCanvas() {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        const container = canvas.parentElement;
+        if (container) {
+            const containerRect = container.getBoundingClientRect();
+            const pixelRatio = window.devicePixelRatio || 2;
 
-        if (isMobile) {
-            const container = canvas.parentElement;
-            if (container) {
-                const containerRect = container.getBoundingClientRect();
+            canvas.style.width = containerRect.width + 'px';
+            canvas.style.height = containerRect.height + 'px';
 
-                // Получаем pixel ratio для retina-экранов
-                const pixelRatio = window.devicePixelRatio || 1;
+            canvas.width = containerRect.width * pixelRatio;
+            canvas.height = containerRect.height * pixelRatio;
 
-                // Устанавливаем CSS размеры
-                canvas.style.width = containerRect.width + 'px';
-                canvas.style.height = containerRect.height + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(pixelRatio, pixelRatio);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
 
-                // Устанавливаем физические размеры canvas УМНОЖЕННЫЕ на pixelRatio для качества
-                canvas.width = containerRect.width * pixelRatio;
-                canvas.height = containerRect.height * pixelRatio;
+            // Карта на всю ширину экрана с отступами по 5%
+            const availableWidth = containerRect.width * 0.95;
+            const scaleX = availableWidth / currentMapImage.width;
+            const scaleY = availableWidth / currentMapImage.width;
+            scale = Math.min(scaleX, scaleY, 1.5);
 
-                // Масштабируем контекст для корректной отрисовки
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.scale(pixelRatio, pixelRatio);
-
-                // Рассчитываем масштаб для отрисовки карты
-                const scaleX = (containerRect.width) / currentMapImage.width;
-                const scaleY = (containerRect.height) / currentMapImage.height;
-                scale = Math.min(scaleX, scaleY, 1.5);
+            // Дополнительно центрируем карту по вертикали
+            const mapHeight = currentMapImage.height * scale;
+            if (mapHeight < containerRect.height) {
+                // Если карта ниже экрана, центрируем
+                offsetY = (containerRect.height - mapHeight) / 2;
             }
-        } else {
-            canvas.width = currentMapImage.width;
-            canvas.height = currentMapImage.height;
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            scale = 1;
         }
-
-        centerMap();
     }
 
     function centerMap() {
