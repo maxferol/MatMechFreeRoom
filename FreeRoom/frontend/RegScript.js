@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Базовый URL для API
     const API_BASE_URL = 'https://freeroom-backend.onrender.com/api';
-    
+
     // ========== ФУНКЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ВИДИМОСТИ ПАРОЛЯ ==========
     function initPasswordToggles() {
         const toggles = document.querySelectorAll('.toggle-password');
         toggles.forEach(button => {
-            button.addEventListener('click', function(e) {
+            button.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('data-target');
                 const input = document.getElementById(targetId);
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function goToMainPage() {
         window.location.href = "MainPage.html";
     }
-    
+
     function switchToLoginPage() {
         window.location.href = "Login.html";
     }
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             homeBtn.style.gap = '8px';
             homeBtn.style.zIndex = '1000';
             homeBtn.style.transition = 'all 0.3s ease';
-            
+
             homeBtn.onmouseenter = () => {
                 homeBtn.style.backgroundColor = '#5b4bc4';
                 homeBtn.style.transform = 'translateY(-2px)';
@@ -71,11 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 homeBtn.style.backgroundColor = '#6c5ce7';
                 homeBtn.style.transform = 'translateY(0)';
             };
-            
+
             homeBtn.onclick = goToMainPage;
             document.body.appendChild(homeBtn);
         }
-        
+
         // Для страницы логина
         const loginCard = document.querySelector('.register-card');
         if (loginCard && !document.getElementById('homeMainBtn')) {
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             homeBtn.style.gap = '8px';
             homeBtn.style.zIndex = '1000';
             homeBtn.style.transition = 'all 0.3s ease';
-            
+
             homeBtn.onmouseenter = () => {
                 homeBtn.style.backgroundColor = '#5b4bc4';
                 homeBtn.style.transform = 'translateY(-2px)';
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 homeBtn.style.backgroundColor = '#6c5ce7';
                 homeBtn.style.transform = 'translateY(0)';
             };
-            
+
             homeBtn.onclick = goToMainPage;
             document.body.appendChild(homeBtn);
         }
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let isLoading = false;
             if (isLoading) return;
             isLoading = true;
-            
+
             const originalBtnText = submitBtn.innerText;
             submitBtn.disabled = true;
             submitBtn.innerText = 'Регистрация...';
@@ -271,18 +271,18 @@ document.addEventListener('DOMContentLoaded', () => {
         async function handleLogin(e) {
             e.preventDefault();
             hideLoginError();
-            
+
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
-            
+
             if (!username || !password) {
                 showLoginError('Заполните логин и пароль');
                 return;
             }
-            
+
             loginBtn.disabled = true;
             loginBtn.innerText = 'Вход...';
-            
+
             try {
                 // Реальный запрос к API для входа
                 const response = await fetch(`${API_BASE_URL}/users/login`, {
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const data = await response.json();
-                
+
                 // Сохраняем данные пользователя в localStorage
                 localStorage.setItem('user', JSON.stringify({
                     login: username,
@@ -310,11 +310,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     userId: data.userId,
                     role: data.role
                 }));
-                
+
+                // Обновляем модальное окно на главной странице (если она открыта)
+                if (window.opener || window.parent) {
+                    try {
+                        // Если есть открытое окно с главной страницей
+                        if (window.opener && window.opener.updateUserModal) {
+                            window.opener.updateUserModal();
+                        }
+                    } catch (e) { }
+                }
+
                 alert('Успешный вход!');
                 // Переход на главную страницу
                 window.location.href = "MainPage.html";
-                
+
             } catch (err) {
                 showLoginError(err.message || 'Ошибка входа. Проверьте логин и пароль');
                 console.error('Login error:', err);
@@ -326,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (loginForm) {
             loginForm.addEventListener('submit', handleLogin);
-            
+
             // Очищаем ошибку при вводе
             const inputs = ['loginUsername', 'loginPassword'];
             inputs.forEach(id => {
@@ -336,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         if (registerRedirect) {
             registerRedirect.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -347,6 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Добавляем кнопку "На главную" на обе страницы
     addHomeButton();
-    
+
     initPasswordToggles();
 });

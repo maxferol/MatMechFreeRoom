@@ -5,6 +5,7 @@ const closeBtn = document.querySelector('#myModal .close');
 
 // Функция для открытия модального окна
 function openModal() {
+    updateUserModal();
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
@@ -263,6 +264,58 @@ document.addEventListener('DOMContentLoaded', () => {
     
     observer.observe(document.body, { childList: true, subtree: true });
 });
+
+// Функция для обновления модального окна пользователя (добавить в конец файла)
+function updateUserModal() {
+    const userData = localStorage.getItem('user');
+    const modalTitle = document.querySelector('#myModal .modal-title');
+    const authButtons = document.querySelector('#myModal .auth-buttons');
+    
+    if (userData && modalTitle && authButtons) {
+        try {
+            const user = JSON.parse(userData);
+            if (user.login) {
+                // Пользователь авторизован - показываем имя
+                modalTitle.textContent = `Привет, ${user.login}!`;
+                authButtons.innerHTML = `
+                    <button class="login-btn" id="logoutBtn">Выйти из аккаунта</button>
+                `;
+                
+                // Добавляем обработчик выхода
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.onclick = () => {
+                        localStorage.removeItem('user');
+                        updateUserModal();
+                        closeModal();
+                        alert('Вы вышли из аккаунта');
+                    };
+                }
+            }
+        } catch(e) {
+            console.error('Ошибка парсинга user data:', e);
+        }
+    } else if (modalTitle && authButtons) {
+        // Пользователь не авторизован - показываем кнопки входа/регистрации
+        modalTitle.textContent = 'Вход в аккаунт';
+        authButtons.innerHTML = `
+            <a href="Login.html" class="login-btn">Вход</a>
+            <a href="Registration.html" class="register-btn">Регистрация</a>
+        `;
+    }
+}
+
+// Функция для проверки авторизации при загрузке страницы
+function checkAuthOnLoad() {
+    updateUserModal();
+}
+
+// Вызываем при загрузке страницы
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkAuthOnLoad);
+} else {
+    checkAuthOnLoad();
+}
 
 // Экспортируем функции для глобального использования
 window.openScheduleModal = openScheduleModal;
