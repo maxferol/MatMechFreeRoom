@@ -1111,16 +1111,23 @@ button:active {
         visibility: hidden;
     }
     
-    /* Улучшаем canvas для тач-событий */
-    canvas {
-        touch-action: pinch-zoom;
-        -webkit-tap-highlight-color: transparent;
+    .map-canvas {
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
-    /* Увеличиваем область клика на комнатах */
-    .map-canvas {
-        padding: 10px;
-        margin-top: 2vh;
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+        min-width: 600px; /* Минимальная ширина для читаемости карты */
+    }
+    
+    .map {
+        overflow-x: auto;
+        width: 100%;
     }
     
     /* Контролы на мобилке */
@@ -1254,6 +1261,7 @@ button:active {
     
     /* Контейнер для карты */
     .map {
+        width: 100%;
         height: auto;
         flex: 1;
     }
