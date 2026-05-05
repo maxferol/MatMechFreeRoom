@@ -66,7 +66,7 @@ button:active {
 
 
 
-.controls-wrapper > * {
+.controls-wrapper>* {
     pointer-events: auto;
 }
 
@@ -438,8 +438,13 @@ button:active {
 
 /* ========== АНИМАЦИИ ========== */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideIn {
@@ -447,6 +452,7 @@ button:active {
         transform: translateY(-50px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -485,7 +491,7 @@ button:active {
     border-radius: 12px;
 }
 
-.viewScheduleBtn{
+.viewScheduleBtn {
     display: flex;
     justify-content: center;
 }
@@ -644,7 +650,8 @@ button:active {
 }
 
 /* Кнопки авторизации как ссылки */
-.login-btn, .register-btn {
+.login-btn,
+.register-btn {
     display: block;
     text-align: center;
     text-decoration: none;
@@ -722,7 +729,7 @@ button:active {
     color: #333;
 }
 
-.welcome-content > p {
+.welcome-content>p {
     font-family: 'Inter', sans-serif;
     font-size: 16px;
     color: #666;
@@ -830,16 +837,16 @@ button:active {
         padding: 20px;
         max-width: 95%;
     }
-    
+
     .welcome-content h2 {
         font-size: 22px;
     }
-    
+
     .schedule-info {
         grid-template-columns: 1fr;
         gap: 4px;
     }
-    
+
     .info-section {
         padding: 12px;
         margin: 15px 0;
@@ -896,12 +903,13 @@ button:active {
         width: 260px;
         padding: 16px;
     }
-    
-    .login-btn, .register-btn {
+
+    .login-btn,
+    .register-btn {
         padding: 10px;
         font-size: 14px;
     }
-    
+
     .modal-title {
         font-size: 16px;
     }
@@ -910,12 +918,13 @@ button:active {
 
 /* Адаптив */
 @media (max-width: 600px) {
+
     .schedule-table th,
     .schedule-table td {
         padding: 8px 6px;
         font-size: 12px;
     }
-    
+
     .schedule-content h2 {
         font-size: 18px;
     }
@@ -927,22 +936,22 @@ button:active {
         gap: 10px;
         padding: 10px 16px;
     }
-    
+
     .floor-btn,
     .date-btn {
         padding: 6px 18px;
         font-size: 14px;
     }
-    
+
     .pair-btn {
         padding: 5px 14px;
         font-size: 12px;
     }
-    
+
     .pair-btn .pair-time {
         font-size: 9px;
     }
-    
+
     .container {
         margin-top: 160px;
     }
@@ -953,28 +962,28 @@ button:active {
         top: 10px;
         gap: 8px;
     }
-    
+
     .floor-btn,
     .date-btn {
         padding: 5px 16px;
         font-size: 13px;
     }
-    
+
     .floor-switcher,
     .date-switcher {
         padding: 4px;
     }
-    
+
     .pair-switcher {
         padding: 4px;
         gap: 3px;
     }
-    
+
     .pair-btn {
         padding: 4px 12px;
         font-size: 11px;
     }
-    
+
     .container {
         margin-top: 170px;
     }
@@ -987,38 +996,39 @@ button:active {
         justify-content: center;
         gap: 8px;
     }
-    
+
     .pair-btn .pair-time {
         display: none;
     }
-    
+
     .pair-btn {
         padding: 6px 14px;
         font-size: 13px;
     }
-    
+
     .container {
         margin-top: 180px;
     }
-    
+
     #myModalRoom .modal-content {
         width: 90%;
         min-height: auto;
         padding: 20px;
     }
-    
+
     #myModalRoom .cabinet {
         font-size: 24px;
     }
 }
 
 @media (max-width: 480px) {
+
     .floor-btn,
     .date-btn {
         padding: 5px 14px;
         font-size: 12px;
     }
-    
+
     .container {
         margin-top: 190px;
     }
@@ -1056,17 +1066,18 @@ button:active {
 }
 
 @media (max-width: 768px) {
+
     /* Показываем мобильную кнопку закрытия */
     .modal .close-mobile {
         display: flex;
     }
-    
+
     /* Скрываем старые крестики */
     #myModalRoom .close,
     #scheduleModal .close-schedule {
         display: none;
     }
-    
+
     /* Верхнее мену - только время */
     .menu .menuTime {
         margin-top: 15px;
@@ -1075,12 +1086,12 @@ button:active {
         text-align: center;
         justify-content: center;
     }
-    
+
     /* Скрываем MatmechMaps текст на мобилке */
     .menu .menuTime span:first-child {
         display: none;
     }
-    
+
     /* Перестраиваем меню */
     .menu {
         flex-direction: row;
@@ -1089,12 +1100,12 @@ button:active {
         padding: 5px 10px;
         min-height: 60px;
     }
-    
+
     /* Кнопка пользователя */
     .user-button {
         order: 1;
     }
-    
+
     /* Время по центру */
     .menuTime {
         order: 2;
@@ -1103,14 +1114,14 @@ button:active {
         flex: 1;
         justify-content: center;
     }
-    
+
     /* Пустая кнопка справа для баланса */
     .search-button {
         order: 3;
         width: 40px;
         visibility: hidden;
     }
-    
+
     .map-canvas {
         padding: 0;
         display: flex;
@@ -1118,38 +1129,39 @@ button:active {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     canvas {
         width: 100% !important;
         height: auto !important;
-        min-width: 600px; /* Минимальная ширина для читаемости карты */
+        min-width: 600px;
+        /* Минимальная ширина для читаемости карты */
     }
-    
+
     .map {
         overflow-x: auto;
         width: 100%;
     }
-    
+
     /* Контролы на мобилке */
     .controls-wrapper {
         gap: 8px;
         padding: 8px 12px;
         flex-wrap: wrap;
     }
-    
+
     .floor-switcher,
     .date-switcher,
     .pair-switcher {
         padding: 4px;
         gap: 3px;
     }
-    
+
     .floor-btn,
     .date-btn {
         padding: 6px 12px;
         font-size: 12px;
     }
-    
+
     .pair-btn {
         padding: 4px 10px;
         font-size: 11px;
@@ -1160,23 +1172,23 @@ button:active {
     .menu .menuTime {
         font-size: 16px;
     }
-    
+
     .controls-wrapper {
         gap: 6px;
         padding: 6px 10px;
     }
-    
+
     .floor-btn,
     .date-btn {
         padding: 4px 10px;
         font-size: 11px;
     }
-    
+
     .pair-btn {
         padding: 3px 8px;
         font-size: 10px;
     }
-    
+
     /* Модальные окна на всю ширину на мобилке */
     #myModalRoom .modal-content {
         width: 95%;
@@ -1184,17 +1196,17 @@ button:active {
         padding: 20px 15px;
         border-radius: 20px;
     }
-    
+
     .schedule-modal .modal-content {
         width: 95%;
         max-width: 95%;
         padding: 15px;
     }
-    
+
     .schedule-content {
         padding: 15px;
     }
-    
+
     .schedule-table th,
     .schedule-table td {
         padding: 6px 4px;
@@ -1236,12 +1248,12 @@ button:active {
         height: 35px !important;
         margin: 8px !important;
     }
-    
+
     .menu {
         min-height: 55px;
         padding: 5px 8px;
     }
-    
+
     /* Масштабирование карты - занимает 80% высоты экрана */
     .map-canvas {
         height: 80vh !important;
@@ -1251,26 +1263,30 @@ button:active {
         justify-content: center;
         align-items: center;
     }
-    
+
     canvas {
 
         width: auto !important;
         height: 1200px !important;
         object-fit: cover;
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: pixelated;
+        image-rendering: high-quality;
     }
-    
+
     /* Контейнер для карты */
     .map {
         width: 100%;
         height: auto;
         flex: 1;
     }
-    
+
     body {
         height: 100vh;
         overflow: hidden;
     }
-    
+
     /* Скролл для контента если нужно */
     .map {
         overflow-y: auto;
@@ -1284,12 +1300,12 @@ button:active {
         height: 30px !important;
         margin: 6px !important;
     }
-    
+
     .map-canvas {
         height: 75vh !important;
         padding: 5px;
     }
-    
+
     canvas {
         max-height: 75vh;
     }
@@ -1303,25 +1319,25 @@ button:active {
         margin: 20px;
         position: relative;
     }
-    
+
     .welcome-content h2 {
         font-size: 20px;
         margin-top: 10px;
     }
-    
-    .welcome-content > p {
+
+    .welcome-content>p {
         font-size: 14px;
     }
-    
+
     .info-section {
         padding: 10px;
         margin: 10px 0;
     }
-    
+
     .info-section h3 {
         font-size: 16px;
     }
-    
+
     .info-section li {
         font-size: 12px;
         margin: 6px 0;
@@ -1329,7 +1345,8 @@ button:active {
 }
 
 /* Убираем лишнюю белую полосу справа */
-html, body {
+html,
+body {
     max-width: 100%;
     overflow-x: hidden;
     position: relative;
