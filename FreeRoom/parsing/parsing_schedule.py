@@ -8,7 +8,7 @@ headers = {
 
 # Генерируем даты на неделю вперед от текущей даты
 start_date = datetime.now().date()
-dates_to_parse = [(start_date + timedelta(days=i)).isoformat() for i in range(7)]
+dates_to_parse = [(start_date + timedelta(days=i)).isoformat() for i in range(9)]
 
 def check_address_and_auditory(subject):
     """Проверяем, что аудитория находится по адресу Тургенева, 4 и начинается с 6"""
