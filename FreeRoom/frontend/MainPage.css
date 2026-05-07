@@ -1130,12 +1130,6 @@ button:active {
         -webkit-overflow-scrolling: touch;
     }
 
-    canvas {
-        width: 100% !important;
-        height: auto !important;
-        min-width: 600px;
-        /* Минимальная ширина для читаемости карты */
-    }
 
     .map {
         overflow-x: auto;
