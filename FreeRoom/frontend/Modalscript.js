@@ -277,7 +277,15 @@ function updateUserModal() {
             if (user.login) {
                 // Пользователь авторизован - показываем имя
                 modalTitle.textContent = `Привет, ${user.login}!`;
+                
+                // Если админ - добавляем кнопку админ-панели
+                let adminBtn = '';
+                if (user.login === 'admin') {
+                    adminBtn = '<a href="admin.html" class="login-btn" style="background: #6c5ce7;">Админ-панель</a>';
+                }
+                
                 authButtons.innerHTML = `
+                    ${adminBtn}
                     <button class="login-btn" id="logoutBtn">Выйти из аккаунта</button>
                 `;
                 

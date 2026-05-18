@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - FreeRoom</title>
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="layout.css">
+    <link rel="stylesheet" href="switchers.css">
+    <link rel="stylesheet" href="modals.css">
+    <link rel="stylesheet" href="responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .admin-container {
+            min-height: 100vh;
+            background-color: #f4f6fc;
+            padding: 30px 20px;
+        }
+
+        .admin-header {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+        }
+
+        .admin-header h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+
+        .admin-header p {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .admin-controls {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-btn {
+            font-family: 'Inter', sans-serif;
+            background: #333333;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .admin-btn:hover {
+            background: #555555;
+            transform: translateY(-2px);
+        }
+
+        .admin-btn:active {
+            transform: translateY(0);
+        }
+
+        .admin-btn.logout {
+            background: #dc3545;
+        }
+
+        .admin-btn.logout:hover {
+            background: #c82333;
+        }
+
+        .bookings-table-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #f5f5f5;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table-header h2 {
+            font-family: 'Inter', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+            color: #333;
+        }
+
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bookings-table thead tr {
+            background: #f9f9f9;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .bookings-table th {
+            padding: 16px;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bookings-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .bookings-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .bookings-table tbody tr:nth-child(odd) {
+            background: #fafafa;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .room-number {
+            background: #e8f4f8;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #0066cc;
+            display: inline-block;
+        }
+
+        .booking-date {
+            color: #666;
+        }
+
+        .lesson-badge {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            font-family: 'Inter', sans-serif;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-bookings {
+            text-align: center;
+            padding: 60px 20px;
+            font-family: 'Inter', sans-serif;
+            color: #999;
+        }
+
+        .no-bookings i {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .error-message {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header h1 {
+                font-size: 24px;
+            }
+
+            .admin-controls {
+                flex-direction: column;
+            }
+
+            .admin-btn {
+                width: 100%;
+            }
+
+            .bookings-table th,
+            .bookings-table td {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="menu">
+        <button id="backBtn" class="modal-btn user-button" title="Вернуться на главную">
+            <i class="fas fa-arrow-left" style="font-size: 20px; color: white;"></i>
+        </button>
+        <a class="menuTime">
+            <span>MatmechMaps | Админ-панель</span>
+        </a>
+        <button id="logoutAdminBtn" class="search-button" title="Выход">
+            <i class="fas fa-sign-out-alt" style="font-size: 20px; color: white;"></i>
+        </button>
+    </div>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Админ-панель</h1>
+            <p>Управление всеми бронированиями аудиторий</p>
+        </div>
+
+        <div class="admin-controls">
+            <button class="admin-btn" id="refreshBtn" onclick="loadAllBookings()">
+                <i class="fas fa-sync-alt"></i> Обновить
+            </button>
+            <button class="admin-btn" id="exportBtn" onclick="exportToCSV()">
+                <i class="fas fa-download"></i> Экспортировать CSV
+            </button>
+        </div>
+
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-value" id="totalBookings">0</div>
+                <div class="stat-label">Всего бронирований</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Уникальных пользователей</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalRooms">0</div>
+                <div class="stat-label">Использовано аудиторий</div>
+            </div>
+        </div>
+
+        <div class="bookings-table-container">
+            <div class="table-header">
+                <h2>Все бронирования</h2>
+            </div>
+            <div id="bookingsContent">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка бронирований...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Проверка авторизации
+        function checkAdminAccess() {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                alert('Пожалуйста, авторизуйтесь');
+                window.location.href = 'Login.html';
+                return;
+            }
+
+            try {
+                const user = JSON.parse(userData);
+                if (user.login !== 'admin') {
+                    alert('У вас нет доступа к админ-панели');
+                    window.location.href = 'MainPage.html';
+                    return;
+                }
+            } catch (e) {
+                alert('Ошибка при проверке доступа');
+                window.location.href = 'MainPage.html';
+            }
+        }
+
+        // Загрузить все бронирования
+        async function loadAllBookings() {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                alert('Сессия истекла. Авторизуйтесь заново.');
+                window.location.href = 'Login.html';
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            const bookingsContent = document.getElementById('bookingsContent');
+
+            bookingsContent.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка бронирований...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/admin/bookings?adminLogin=${user.login}`);
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки бронирований');
+                }
+
+                const bookings = await response.json();
+
+                if (!Array.isArray(bookings) || bookings.length === 0) {
+                    bookingsContent.innerHTML = `
+                        <div class="no-bookings">
+                            <i class="fas fa-inbox"></i>
+                            <h3>Нет бронирований</h3>
+                            <p>Пока никто не забронировал аудитории</p>
+                        </div>
+                    `;
+                    updateStats([]);
+                    return;
+                }
+
+                // Сортируем по дате
+                bookings.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Создаем таблицу
+                let tableHTML = `
+                    <table class="bookings-table">
+                        <thead>
+                            <tr>
+                                <th>Пользователь</th>
+                                <th>Аудитория</th>
+                                <th>Дата</th>
+                                <th>Пара</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                bookings.forEach(booking => {
+                    const date = new Date(booking.date);
+                    const formattedDate = date.toLocaleDateString('ru-RU', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+
+                    tableHTML += `
+                        <tr>
+                            <td><span class="user-name">${booking.userName}</span></td>
+                            <td><span class="room-number">${booking.roomNumber}</span></td>
+                            <td><span class="booking-date">${formattedDate}</span></td>
+                            <td><span class="lesson-badge">${booking.lessonNumber}</span></td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                bookingsContent.innerHTML = tableHTML;
+                updateStats(bookings);
+            } catch (error) {
+                console.error('Ошибка:', error);
+                bookingsContent.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i> Ошибка загрузки данных: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Обновить статистику
+        function updateStats(bookings) {
+            document.getElementById('totalBookings').textContent = bookings.length;
+
+            // Уникальные пользователи
+            const uniqueUsers = new Set(bookings.map(b => b.userName)).size;
+            document.getElementById('totalUsers').textContent = uniqueUsers;
+
+            // Уникальные комнаты
+            const uniqueRooms = new Set(bookings.map(b => b.roomNumber)).size;
+            document.getElementById('totalRooms').textContent = uniqueRooms;
+        }
+
+        // Экспортировать в CSV
+        function exportToCSV() {
+            const table = document.querySelector('.bookings-table');
+            if (!table) {
+                alert('Нет данных для экспорта');
+                return;
+            }
+
+            let csv = 'Пользователь,Аудитория,Дата,Пара\n';
+            
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const userName = cells[0].textContent;
+                const roomNumber = cells[1].textContent;
+                const date = cells[2].textContent;
+                const lesson = cells[3].textContent;
+                
+                csv += `"${userName}","${roomNumber}","${date}","${lesson}"\n`;
+            });
+
+            // Скачиваем CSV
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `bookings_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Обработчики кнопок
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.location.href = 'MainPage.html';
+        });
+
+        document.getElementById('logoutAdminBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            alert('Вы вышли из аккаунта');
+            window.location.href = 'MainPage.html';
+        });
+
+        // Загруженяем при открытии страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAdminAccess();
+            loadAllBookings();
+
+            // Обновляем каждые 30 секунд
+            setInterval(loadAllBookings, 30000);
+        });
+
+        // Для браузеров, которые уже загружены
+        if (document.readyState !== 'loading') {
+            checkAdminAccess();
+            loadAllBookings();
+            setInterval(loadAllBookings, 30000);
+        }
+    </script>
+</body>
+
+</html>

@@ -84,28 +84,28 @@ app.MapGet("/admin/load-schedule", async () =>
 app.MapControllers();
 
 
-// try
-// {
-//     var parser = new ScheduleParser(connectionString, databaseName);
-//     
-//     // Путь к файлу с расписанием
-//     string scheduleJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "schedule_week.json");
-//     
-//     // Альтернативный путь -从 корня проекта
-//     if (!File.Exists(scheduleJsonPath))
-//     {
-//         scheduleJsonPath = Path.Combine(Directory.GetCurrentDirectory(), "schedule_week.json");
-//     }
-//     
-//     if (File.Exists(scheduleJsonPath))
-//     {
-//         await parser.LoadScheduleFromJsonFile(scheduleJsonPath);
-//     }
-// }
-// catch (Exception ex)
-// {
-//     Console.WriteLine($"❌ Ошибка при загрузке расписания: {ex.Message}");
-// }
+try
+{
+    var parser = new ScheduleParser(connectionString, databaseName);
+    
+    // Путь к файлу с расписанием
+    string scheduleJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "schedule_week.json");
+    
+    // Альтернативный путь -从 корня проекта
+    if (!File.Exists(scheduleJsonPath))
+    {
+        scheduleJsonPath = Path.Combine(Directory.GetCurrentDirectory(), "schedule_week.json");
+    }
+    
+    if (File.Exists(scheduleJsonPath))
+    {
+        await parser.LoadScheduleFromJsonFile(scheduleJsonPath);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"❌ Ошибка при загрузке расписания: {ex.Message}");
+}
 
 
 // var tester = new UserMongoTester(connectionString, databaseName);

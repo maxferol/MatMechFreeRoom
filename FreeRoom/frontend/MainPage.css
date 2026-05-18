@@ -558,25 +558,7 @@ button:active {
     font-size: 14px;
 }
 
-/* Увеличенное модальное окно комнаты */
-#myModalRoom .modal-content {
-    position: fixed;
-    width: 400px;
-    min-height: 420px;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-    padding: 30px 25px;
-    background: #FFFFFF;
-    border: 2px solid #000000;
-    border-radius: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-    box-shadow: none;
-}
+
 
 .status-badge {
     display: inline-block;
@@ -913,11 +895,6 @@ button:active {
     .modal-title {
         font-size: 16px;
     }
-}
-
-
-/* Адаптив */
-@media (max-width: 600px) {
 
     .schedule-table th,
     .schedule-table td {

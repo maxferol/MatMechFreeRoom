@@ -6,6 +6,7 @@ using FreeRoom.backend.src.Application.Users.Commands.CreateUser;
 using FreeRoom.backend.src.Domain.Value_Object.User;
 using FreeRoom.backend.src.Infrastructure.UserStorage;
 using FreeRoom.backend.src.Application.Rooms.Commands;
+using FreeRoom.backend.src.Domain.Interfaces;
 
 namespace FreeRoom.backend.src.API.Controllers;
 
@@ -15,11 +16,13 @@ public class UsersController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly UserMongoDB _userRepository; // Экземпляр класса
+    private readonly IRoomDynamicRepository _roomRepository;
 
-    public UsersController(IMediator mediator, UserMongoDB userRepository)
+    public UsersController(IMediator mediator, UserMongoDB userRepository, IRoomDynamicRepository roomRepository)
     {
         _mediator = mediator;
         _userRepository = userRepository; // Сохраняем экземпляр
+        _roomRepository = roomRepository;
     }
 
     [HttpGet("{login}/bookings")]
@@ -29,7 +32,7 @@ public class UsersController : ControllerBase
             return BadRequest(new { error = "Логин пользователя не указан" });
         try
         {
-            // Используем 'date', который пришел из параметров
+            
             var result = await _mediator.Send(new GetUserBookingsQuery(login, date));
             return Ok(result);
         }
@@ -49,9 +52,7 @@ public class UsersController : ControllerBase
 
         return Ok(new { message = "Успешно забронировано" });
     }
-
-    // Добавьте эти методы в UsersController.cs
-
+    
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] CreateUserRequest request)
     {
@@ -147,6 +148,49 @@ public class UsersController : ControllerBase
         {
             Console.WriteLine($"Ошибка входа: {ex.Message}");
             return StatusCode(500, new { message = "Внутренняя ошибка сервера" });
+        }
+    }
+
+    // Админ-панель: получить все бронирования
+    [HttpGet("admin/bookings")]
+    public async Task<IActionResult> GetAllBookings([FromQuery] string adminLogin)
+    {
+        try
+        {
+            // Проверяем, что запрос от админа
+            if (adminLogin != "admin")
+            {
+                return Unauthorized(new { message = "Только администратор может получить все бронирования" });
+            }
+
+            Console.WriteLine("Hello admin!");
+            var allBookings = await _roomRepository.GetAll();
+            
+            // Преобразуем в список с информацией о пользователе и комнате
+            var bookingsList = new List<object>();
+            
+            foreach (var booking in allBookings)
+            {
+                // Получаем информацию о пользователе
+                var user = await _userRepository.GetById(booking.UserId.Value);
+                var userName = user?.Login.LoginUser ?? "Неизвестный пользователь";
+                
+                bookingsList.Add(new
+                {
+                    roomNumber = booking.RoomStaticId.Value,
+                    userName = userName,
+                    date = booking.BookingDate.ToString(),
+                    lessonNumber = booking.LessonNumber,
+                    userId = booking.UserId.Value
+                });
+            }
+
+            return Ok(bookingsList);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка получения бронирований: {ex.Message}");
+            return StatusCode(500, new { message = "Внутренняя ошибка сервера", error = ex.Message });
         }
     }
 // DTO для запроса входа
