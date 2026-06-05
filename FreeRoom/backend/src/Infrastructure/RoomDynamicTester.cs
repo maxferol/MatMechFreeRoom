@@ -3,25 +3,26 @@ using FreeRoom.backend.src.Domain.Enities;
 using FreeRoom.backend.src.Domain.Value_Object.RoomDynamic;
 using FreeRoom.backend.src.Infrastructure.GetEntitiesId;
 using FreeRoom.backend.src.Infrastructure.RoomStorage;
-using MongoDB.Bson;
 
 namespace FreeRoom.backend.src.Infrastructure;
 
 public class RoomDynamicTester
 {
-    private readonly RoomDynamicMongoDB _repository;
+    private readonly RoomDynamicPostgres _repository;
 
-    public RoomDynamicTester(string connectionString, string dbName)
+    public RoomDynamicTester(string connectionString)
     {
-        _repository = new RoomDynamicMongoDB(connectionString, dbName);
+        _repository = new RoomDynamicPostgres(connectionString);
     }
 
     public async Task RunTest()
     {
-        Console.WriteLine("\n>>> НАЧАЛО ТЕСТИРОВАНИЯ RoomDynamicMongoDB <<<");
+        Console.WriteLine("\n>>> НАЧАЛО ТЕСТИРОВАНИЯ RoomDynamicPostgres <<<");
 
         try
         {
+            await _repository.InitializeAsync();
+
             // 1. ПОДГОТОВКА ДАННЫХ
             var staticId = new RoomStaticId(Guid.NewGuid());
             var userId = new UserId(Guid.NewGuid());
@@ -63,9 +64,9 @@ public class RoomDynamicTester
             Console.WriteLine("[TEST 4]: Тест инкремента просмотров...");
             bool isUpdated = await _repository.IncrementViewCountAsync(bookingId);
             if (isUpdated)
-                Console.WriteLine("✓ Счетчик обновлен в базе (проверь поле viewCount в Compass).");
+                Console.WriteLine("✓ Счетчик обновлен в PostgreSQL.");
             else
-                Console.WriteLine("! Предупреждение: Документ не обновлен (возможно, поле не существует в BSON).");
+                throw new Exception("Ошибка: Счетчик не обновлен.");
 
             // 6. ТЕСТ: DeleteRoomDynamic
             // Console.WriteLine("[TEST 5]: Удаление записи...");
@@ -74,14 +75,13 @@ public class RoomDynamicTester
             //     Console.WriteLine("✓ Запись успешно удалена.");
             // else
             //     throw new Exception("Ошибка: Не удалось удалить запись.");
-            //
-            // Console.WriteLine("\n>>> ВСЕ ТЕСТЫ RoomDynamicMongoDB ПРОЙДЕНЫ УСПЕШНО <<<");
         }
         catch (Exception ex)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"\nОШИБКА ТЕСТЕРА: {ex.Message}");
             Console.ResetColor();
+            throw;
         }
     }
 }

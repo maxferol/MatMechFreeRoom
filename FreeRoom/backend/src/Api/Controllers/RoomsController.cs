@@ -8,7 +8,7 @@ namespace FreeRoom.backend.src.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RoomsController
+public class RoomsController : ControllerBase
 {
     private readonly IRoomDynamicRepository _roomDynamicRepository;
     private readonly IRoomStaticRepository _roomStaticRepository; // нужно создать
