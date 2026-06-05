@@ -1,4 +1,6 @@
 ﻿using FreeRoom.backend.src.Infrastructure;
+using FreeRoom.backend.src.Infrastructure.RoomStorage;
+using Microsoft.EntityFrameworkCore;
 
 namespace FreeRoom.backend;
 
@@ -11,7 +13,12 @@ public class Program
             throw new InvalidOperationException(
                 "Set the FREEROOM_POSTGRES_CONNECTION_STRING environment variable.");
 
-        var roomTester = new RoomDynamicTester(connectionString);
+        var options = new DbContextOptionsBuilder<FreeRoomDbContext>()
+            .UseNpgsql(connectionString)
+            .Options;
+
+        await using var dbContext = new FreeRoomDbContext(options);
+        var roomTester = new RoomDynamicTester(new RoomDynamicPostgres(dbContext));
         await roomTester.RunTest();
     }
 }

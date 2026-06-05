@@ -10,9 +10,9 @@ public class RoomDynamicTester
 {
     private readonly RoomDynamicPostgres _repository;
 
-    public RoomDynamicTester(string connectionString)
+    public RoomDynamicTester(RoomDynamicPostgres repository)
     {
-        _repository = new RoomDynamicPostgres(connectionString);
+        _repository = repository;
     }
 
     public async Task RunTest()

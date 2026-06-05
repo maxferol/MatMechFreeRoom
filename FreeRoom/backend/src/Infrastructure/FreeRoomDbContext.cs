@@ -41,8 +41,8 @@ public class FreeRoomDbContext(DbContextOptions<FreeRoomDbContext> options) : Db
             .HasColumnName("booking_date")
             .HasColumnType("timestamp without time zone")
             .HasConversion(new ValueConverter<BookingDate, DateTime>(
-                date => date.Value,
-                value => new BookingDate(value)));
+                date => DateTime.SpecifyKind(date.Value, DateTimeKind.Unspecified),
+                value => new BookingDate(DateTime.SpecifyKind(value, DateTimeKind.Unspecified))));
         room.Property<int>("ViewCount")
             .HasColumnName("view_count")
             .HasDefaultValue(0);
