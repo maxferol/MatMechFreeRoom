@@ -8,6 +8,7 @@ publish/
 .idea/
 *.sln.iml
 *.user
+.idea/.idea.FreeRoom/.idea
 
 # === Специфично для Visual Studio ===
 .vs/
